@@ -12,6 +12,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
 
     env:
       TZ: Asia/Shanghai
@@ -44,7 +45,8 @@ jobs:
         cd twitter-json
         go run tweets.go
 
-    - name: Git push    
+    - name: Git push
+      run: |
         git add .
         git commit -m "update by github action"
         git push
