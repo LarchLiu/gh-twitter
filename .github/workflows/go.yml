@@ -54,7 +54,7 @@ jobs:
     - name: push to gh-page branch
       run: |
         git clone --depth=1 --single-branch --branch gh-pages https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} /home/runner/gh-page
-        copy /home/runner/work/gh-twitter/gh-twitter/twitter-json/raw/twitter to /home/runner/gh-page
+        cp /home/runner/work/gh-twitter/gh-twitter/twitter-json/raw/twitter /home/runner/gh-page
         git config --local user.email "larch.liu@gmail.com"
         git config --local user.name "Alex.Liu"
         git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
