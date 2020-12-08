@@ -15,16 +15,17 @@ jobs:
         with:
           node-version: '10.x'
 
-      - name: Cache dependencies
-        uses: actions/cache@v1
-        with:
-          path: ~/vue-twitter/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      # - name: Cache dependencies
+      #   uses: actions/cache@v1
+      #   with:
+      #     path: ~/vue-twitter/.npm
+      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-node-
       - name: Npm build
         run: |
           cd vue-twitter
+          npm install
           npm run build
 
       - name: deploy
