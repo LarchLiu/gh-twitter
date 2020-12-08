@@ -1,0 +1,44 @@
+name: Go
+on:
+  # push:
+  # pull_request:
+  # schedule:
+  #   - cron:  '0 5 * * *'
+  watch:
+    types: started
+
+jobs:
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    env:
+      TZ: Asia/Shanghai
+
+    steps:
+
+    - name: Set up Go 1.12
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.12
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get dependencies
+      run: |
+        go get -v -t -d ./...
+
+    - name: Test
+      run:  |
+        git config --local user.email "larch.liu@gmail.com"
+        git config --local user.name "Alex.Liu"
+        git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        git pull
+        go run tweets.go
+        git add .
+        git commit -m "update by github action"
+        git push
