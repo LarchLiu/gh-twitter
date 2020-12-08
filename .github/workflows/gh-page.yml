@@ -23,9 +23,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - name: Npm build
-        with:
-        path: ~/vue-twitter
-        run: npm run build
+        run: ~/vue-twitter/npm run build
 
       - name: deploy
         uses: peaceiris/actions-gh-pages@v3
