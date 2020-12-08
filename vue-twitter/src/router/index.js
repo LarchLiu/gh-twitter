@@ -11,7 +11,7 @@ const routerHistory = createWebHistory("/gh-twitter")
 
 // todo 目前不支持 () => import( /* webpackChunkName: 'Home' */ ) 引入
 import Home from '/@/page/home/index.vue';
-import Login from '/@/page/Login/index.vue';
+import Login from '/@/page/login/index.vue';
 
 const router = createRouter({
     history: routerHistory,
