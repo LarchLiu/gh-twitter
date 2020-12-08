@@ -5,7 +5,7 @@
             退出
         </a-button>
     </div>
-    <a-calendar v-model:value="value">
+    <a-calendar v-model="value">
         <template v-slot:dateCellRender="{ current: value }">
             <ul class="events">
                 <li v-for="item in getListData(value)"
