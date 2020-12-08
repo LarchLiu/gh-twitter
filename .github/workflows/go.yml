@@ -57,6 +57,7 @@ jobs:
         cp -r /home/runner/work/gh-twitter/gh-twitter/twitter-json/raw/twitter /home/runner/gh-page
         git config --local user.email "larch.liu@gmail.com"
         git config --local user.name "Alex.Liu"
+        cd /home/runner/gh-page
         git add .
         git commit -m "update by github action"
         git push
