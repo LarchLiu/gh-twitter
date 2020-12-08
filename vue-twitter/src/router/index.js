@@ -6,7 +6,7 @@ import {
     createWebHistory
 } from 'vue-router'
 
-const routerHistory = createWebHistory("/twitter")
+const routerHistory = createWebHistory("/gh-twitter")
 
 
 // todo 目前不支持 () => import( /* webpackChunkName: 'Home' */ ) 引入
