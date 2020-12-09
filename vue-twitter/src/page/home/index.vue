@@ -8,10 +8,10 @@
     <a-calendar v-model="value">
         <template v-slot:dateCellRender="{ current: value }">
             <ul class="events">
-                <li v-for="item in getListData(value)"
-                    :key="item.content">
-                    <a-badge :status="item.type"
-                    :text="item.content" />
+                <li v-for="item in usersData"
+                    :key="item.Profile.Name">
+                    <a-badge status="success"
+                    :text="item.Profile.Username" />
                 </li>
             </ul>
         </template>
@@ -103,8 +103,10 @@ export default {
             })
         }
 
-        onMounted(getUserList)
-        watch(usersList, (_, _) => {
+        onMounted(() => {
+          getUserList()
+        })
+        watch(usersList, () => {
             usersData.value = []
             for (let i = 0; i < usersList.value.length; i++) {
                 getUserTweets(usersList.value[i])
@@ -114,6 +116,7 @@ export default {
         return {
             value,
             usersList,
+            usersData,
             getListData,
             getMonthData,
             getUserList,
