@@ -1,15 +1,18 @@
 name: github pages
 
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
+    paths:
+      - 'vue-twitter/**'
   watch:
     types: started
 
 jobs:
   deploy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
       - uses: actions/checkout@v2
@@ -27,7 +30,7 @@ jobs:
           npm run build
 
       - run: |
-          cp -r /home/runner/work/gh-twitter/gh-twitter/twitter-json/raw/twitter /home/runner/work/gh-twitter/gh-twitter/vue-twitter/dist
+          cp -r ${{ github.workspace }}/twitter-json/raw/twitter ${{ github.workspace }}/vue-twitter/dist
         
       - name: deploy
         uses: peaceiris/actions-gh-pages@v3
