@@ -93,9 +93,9 @@ export default {
         console.log(res)
         let users = res.replace(/\s*/g,"").split(',')
         for (let i = 0; i < users.length; i++) {
-            userApi.getTweetsData(users[i].then(data => {
+            userApi.getTweetsData(users[i]).then(data => {
                 console.log(data)
-            })).catch(err => {
+            }).catch(err => {
                 console.log(err)
             })
         }
