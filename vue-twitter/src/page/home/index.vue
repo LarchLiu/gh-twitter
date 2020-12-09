@@ -91,6 +91,14 @@ export default {
     created () {
       userApi.getUsersData().then(res => {
         console.log(res)
+        let users = res.replace(/\s*/g,"").split(',')
+        for (let i = 0; i < users.length; i++) {
+            userApi.getTweetsData(users[i].then(data => {
+                console.log(data)
+            })).catch(err => {
+                console.log(err)
+            })
+        }
       }).catch(e => {
         console.log(e)
       })
