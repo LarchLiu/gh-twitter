@@ -25,7 +25,7 @@
   </div>
 </template>
 <script>
-import { ref,getCurrentInstance, reactive } from 'vue';
+import { ref,getCurrentInstance, reactive, onMounted, watch } from 'vue';
 import userApi from '/@/api/twitter/user';
 
 
