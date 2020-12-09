@@ -34,14 +34,13 @@ func GetFileContent(filePath string) (string, error) {
 
 func main() {
 	var users []string
-	f, err := GetFileContent("./raw/twitter/userList.txt")
+	twitterPath := "./raw/twitter/"
+	f, err := GetFileContent(twitterPath + "userList.txt")
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Println(f)
-		f = strings.Replace(f, " ", "", -1)
+		f = strings.Replace(f, " ", "", -1) // 删除空格
 		users = strings.Split(f, ",")
-		fmt.Println(users)
 	}
 
 	for _, user := range users {
@@ -65,10 +64,10 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		file, er := os.OpenFile("./raw/twitter/"+user+".json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+		file, er := os.OpenFile(twitterPath+user+".json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 		defer func() { file.Close() }()
 		if er != nil && os.IsNotExist(er) {
-			file, err = os.Create("./raw/twitter/" + user + ".json")
+			file, err = os.Create(twitterPath + user + ".json")
 		}
 		_, err = file.Write(jsonBytes)
 		if err != nil {
