@@ -35,7 +35,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	file, er := os.Open("./raw/twitter/FCBarcelona.json")
+	file, er := os.OpenFile("./raw/twitter/FCBarcelona.json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	defer func() { file.Close() }()
 	if er != nil && os.IsNotExist(er) {
 		file, err = os.Create("./raw/twitter/FCBarcelona.json")
