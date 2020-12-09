@@ -35,6 +35,8 @@ export default {
         const { ctx } = getCurrentInstance();
 
         let value =  '';
+        const usersList = ref([])
+        const usersData = ref([])
 
         const getListData = (value)=> {
             let listData
@@ -81,27 +83,42 @@ export default {
                 path: '/login'
             })
         }
-        return {
-            value,
-            getListData,
-            getMonthData,
-            onExit
+
+        const getUserList = ()=> {
+            userApi.getUsersData().then(res => {
+                console.log(res)
+                usersList.value = res.replace(/\s*/g,"").split(',')
+            }).catch(e => {
+                console.log(e)
+                usersList.value = []
+            })
         }
-    },
-    created () {
-      userApi.getUsersData().then(res => {
-        console.log(res)
-        let users = res.replace(/\s*/g,"").split(',')
-        for (let i = 0; i < users.length; i++) {
-            userApi.getTweetsData(users[i]).then(data => {
+
+        const getUserTweets = (user) => {
+            userApi.getTweetsData(user).then(data => {
+                usersData.value.push(data)
                 console.log(data)
             }).catch(err => {
                 console.log(err)
             })
         }
-      }).catch(e => {
-        console.log(e)
-      })
+
+        onMounted(getUserList)
+        watch(usersList, (_, _) => {
+            usersData.value = []
+            for (let i = 0; i < usersList.value.length; i++) {
+                getUserTweets(usersList.value[i])
+            }
+        })
+
+        return {
+            value,
+            usersList,
+            getListData,
+            getMonthData,
+            getUserList,
+            onExit
+        }
     }
 }
 </script>
