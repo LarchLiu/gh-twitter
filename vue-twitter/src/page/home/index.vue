@@ -26,9 +26,6 @@
 </template>
 <script>
 import { ref,getCurrentInstance, reactive } from 'vue';
-import jsonp from '/@/api/jsonp';
-import { commonParams, options } from '/@/api/config';
-
 import userApi from '/@/api/twitter/user';
 
 
@@ -92,22 +89,10 @@ export default {
         }
     },
     created () {
-      // userApi.getUsersData().then(res => {
-      //   console.log(res)
-      // }).catch(e => {
-      //   console.log(e)
-      // })
-      // const url ="https://c.y.qq.com/v8/fcg-bin/fcg_myqq_toplist.fcg"  //跨域的url
-      const url = "https://raw.githubusercontent.com/LarchLiu/twitter-json/main/raw/twitter/userList.txt"
-      const data = Object.assign({},commonParams,{  //Object.assign()是ES6api是将后面的对象参数，写入{}中，去重，且如存在相同key后者覆盖前者。
-        platform: 'h5',
-        format: 'text',
-        needNewCode: 1
-      })
-      jsonp(url, null, options).then(res => {
+      userApi.getUsersData().then(res => {
         console.log(res)
-      }).catch(err => {
-        console.log(err)
+      }).catch(e => {
+        console.log(e)
       })
     }
 }
