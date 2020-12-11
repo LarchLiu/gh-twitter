@@ -45,7 +45,7 @@ func randFileName(dirPath string, suffix string) (fileName string) {
 		name += string(randChar[rand.Intn(size)])
 	}
 	fileName = path.Join(dirPath, name)
-	fileName += suffix
+	fileName += "." + suffix
 	_, err := os.Stat(fileName)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -58,9 +58,26 @@ func randFileName(dirPath string, suffix string) (fileName string) {
 }
 
 func writeImage(dirPath string, href string) string {
-	i := strings.LastIndex(href, ".")
-	suffix := href[i:]
-	fileName := randFileName(dirPath, suffix)
+	var suffix string
+	var name string
+	var fileName string
+	i := strings.LastIndex(href, "/")
+	nameReg := regexp.MustCompile(`\/(.*?)\?(?s)`)
+	formatReg := regexp.MustCompile(`(?s)format=(.*?)&(?s)`)
+
+	if formatReg.MatchString(href) {
+		name = nameReg.FindStringSubmatch(href[i:])[1]
+		suffix = formatReg.FindStringSubmatch(href)[1]
+		fileName = path.Join(dirPath, name) + "." + suffix
+		fmt.Printf("fileName %s\n", fileName)
+		_, err := os.Stat(fileName)
+		if err == nil {
+			return fileName
+		}
+	} else {
+		suffix = "jpg"
+		fileName = randFileName(dirPath, suffix)
+	}
 	imageFile, err := os.Create(fileName)
 	if err != nil {
 		fmt.Printf("[writeImage create file]: fileName: %s\n href: %s\nerror: %s\n", fileName, href, err.Error())
@@ -119,13 +136,13 @@ func main() {
 		twitter.Profile = profile
 		count := 0
 		for tweet := range twitterscraper.GetTweets(context.Background(), user, maxTweetsNbr) {
-			if tweet.Tweet.Photos != nil {
+			if tweet.Tweet.Photos != nil && len(tweet.Tweet.Photos) > 0 {
 				var photos []string
 				for _, src := range tweet.Tweet.Photos {
-					correctHref, exist := getCorrectHref(src, "")
-					if exist {
-						photos = append(photos, writeImage(picPath, correctHref))
-					}
+					file := writeImage(picPath, src)
+					file = strings.Replace(file, "raw", ".", 1)
+					fmt.Print(file)
+					photos = append(photos, file)
 				}
 				tweet.Tweet.Photos = photos
 			}
