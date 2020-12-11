@@ -62,15 +62,27 @@ func writeImage(dirPath string, href string) string {
 	var name string
 	var fileName string
 	i := strings.LastIndex(href, "/")
-	nameReg := regexp.MustCompile(`\/(.*?)\?(?s)`)
+	nameReg := regexp.MustCompile(`\/(.*?)(\.|\?)(?s)`)
 	formatReg := regexp.MustCompile(`(?s)format=(.*?)&(?s)`)
+	suffixReg := regexp.MustCompile(`\A((http)|(https))(.+)((.jpg)|(.png)|(.jpeg))\z`)
 
 	if formatReg.MatchString(href) {
+		// such like https://pbs.twimg.com/media/Eo9bCnnXcAAE_Wz?format=jpg&name=large
 		name = nameReg.FindStringSubmatch(href[i:])[1]
 		suffix = formatReg.FindStringSubmatch(href)[1]
 		fileName = path.Join(dirPath, name) + "." + suffix
 		fmt.Printf("fileName %s\n", fileName)
 		_, err := os.Stat(fileName)
+		if err == nil {
+			return fileName
+		}
+	} else if suffixReg.MatchString(href) {
+		// such like https://pbs.twimg.com/profile_images/1333096463916797954/7bzarkH2_normal.jpg
+		j := strings.LastIndex(href, "/") + 1
+		name = href[j:]
+		fileName = path.Join(dirPath, name)
+		_, err := os.Stat(fileName)
+		fmt.Printf("fileName %s\n", fileName)
 		if err == nil {
 			return fileName
 		}
@@ -132,6 +144,14 @@ func main() {
 		profile, err := twitterscraper.GetProfile(user)
 		if err != nil {
 			fmt.Println(err)
+		}
+
+		if profile.Avatar != "" {
+			var avatar string
+			file := writeImage(picPath, profile.Avatar)
+			file = strings.Replace(file, "raw", ".", 1)
+			fmt.Print(file)
+			profile.Avatar = avatar
 		}
 		twitter.Profile = profile
 		count := 0
