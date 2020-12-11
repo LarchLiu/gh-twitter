@@ -147,11 +147,10 @@ func main() {
 		}
 
 		if profile.Avatar != "" {
-			var avatar string
 			file := writeImage(picPath, profile.Avatar)
 			file = strings.Replace(file, "raw", ".", 1)
 			fmt.Print(file)
-			profile.Avatar = avatar
+			profile.Avatar = file
 		}
 		twitter.Profile = profile
 		count := 0
