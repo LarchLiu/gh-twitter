@@ -45,9 +45,13 @@ export default {
       }
     }
   },
-  methods: {
-    getTime(timestamp) {
+  setup (props) {
+    const getTime = (timestamp) => {
       return formatTime(timestamp, null)
+    }
+
+    return {
+      getTime
     }
   }
 }
