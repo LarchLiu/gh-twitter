@@ -11,6 +11,7 @@ import axios from './http';
 
 // UI框架
 import {
+  Avatar,
   Button,
   Input,
   Calendar,
@@ -25,6 +26,7 @@ app.config.globalProperties.$axios = axios;
 
 //ui注入
 app
+.use(Avatar)
 .use(Button)
 .use(Input)
 .use(Form)
