@@ -45,7 +45,7 @@ export default {
       }
     }
   },
-  method: {
+  methods: {
     getTime(timestamp) {
       return formatTime(timestamp, null)
     }
