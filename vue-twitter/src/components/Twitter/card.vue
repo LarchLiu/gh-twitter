@@ -10,7 +10,7 @@
         <div id="name">
           <span style="font-weight: 700; border: 0 solid black; margin-right: 10px">{{ tweet.Name }}</span>
           <span style="font-weight: 400; color: rgb(91, 112, 131);">
-            {{ '@' + tweet.Username + ' · ' + tweet.TimeParsed }}
+            {{ '@' + tweet.Username + ' · ' + getTime(tweet.Timestamp) }}
           </span>
         </div>
         <div class="text">
@@ -33,6 +33,8 @@
 </template>
 
 <script>
+import { formatTime } from "/@/utils/index.js"
+
 export default {
   name: 'Card',
   props: {
@@ -43,6 +45,11 @@ export default {
       }
     }
   },
+  method: {
+    getTime(timestamp) {
+      return formatTime(timestamp, null)
+    }
+  }
 }
 </script>
 
