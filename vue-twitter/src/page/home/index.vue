@@ -1,82 +1,45 @@
-<template xmlns:v-slot="http://www.w3.org/1999/XSL/Transform">
-  <div>
-    <div class="header">
-        <a-button type="primary" @click="onExit">
-            退出
-        </a-button>
-    </div>
-    <a-calendar v-model="value">
-        <template v-slot:dateCellRender="{ current: value }">
-            <ul class="events">
-                <li v-for="item in usersData"
-                    :key="item.Profile.Name">
-                    <a-badge status="success"
-                    :text="item.Profile.Username" />
-                </li>
-            </ul>
-        </template>
-        <template v-slot:monthCellRender="{ current: value }">
-            <div v-if="getMonthData(value)" class="notes-month">
-                <section>{{ getMonthData(value) }}</section>
-                <span>Backlog number</span>
+<template>
+  <div class="container">
+    <div class="w1210">
+      <div class="bd">
+        <div class="aside-wrap">
+          <aside-box
+            title="Twitter"
+            :need-fixed="true" 
+            id-name="header"
+          >
+            <div v-if="usersList">
+              <div
+                v-for="user in usersList"
+                :key="user"
+              >
+                <h3>{{ user }}</h3>
+              </div>
             </div>
-        </template>
-    </a-calendar>
+          </aside-box>
+        </div>
+        <twitter
+          class="detail"
+          :detail="usersData ? usersData[0] : {}"
+        />
+      </div>
+    </div>
   </div>
 </template>
 <script>
-import { ref,getCurrentInstance, reactive, onMounted, watch } from 'vue';
+import { ref,getCurrentInstance, onMounted, watch } from 'vue';
 import userApi from '/@/api/twitter/user';
+import AsideBox from '/@/components/AsideBox/index.vue';
+import Twitter from '/@/components/Twitter/index.vue';
 
 
 export default {
+    components: { AsideBox, Twitter },
     setup () {
 
         const { ctx } = getCurrentInstance();
-
-        let value =  '';
         const usersList = ref([])
         const usersData = ref([])
-
-        const getListData = (value)=> {
-            let listData
-            switch (value.date()) {
-                case 8:
-                    listData = [
-                        { type: 'warning', content: 'This is warning event.' },
-                        { type: 'success', content: 'This is usual event.' },
-                    ]
-                    break
-                case 10:
-                    listData = [
-                        { type: 'warning', content: 'This is warning event.' },
-                        { type: 'success', content: 'This is usual event.' },
-                        { type: 'error', content: 'This is error event.' },
-                    ]
-                    break
-                case 15:
-                    listData = [
-                        { type: 'warning', content: 'This is warning event' },
-                        {
-                            type: 'success',
-                            content: 'This is very long usual event。。....',
-                        },
-                        { type: 'error', content: 'This is error event 1.' },
-                        { type: 'error', content: 'This is error event 2.' },
-                        { type: 'error', content: 'This is error event 3.' },
-                        { type: 'error', content: 'This is error event 4.' },
-                    ]
-                    break
-                default:
-            }
-            return listData || []
-        }
-
-        const getMonthData = (value) =>{
-            if (value.month() === 8) {
-                return 1394
-            }
-        }
 
         const onExit = ()=>{
             ctx.$router.push({
@@ -86,8 +49,9 @@ export default {
 
         const getUserList = ()=> {
             userApi.getUsersData().then(res => {
-                console.log(res)
+                console.log(usersList.value)
                 usersList.value = res.replace(/\s*/g,"").split(',')
+                console.log(usersList.value)
             }).catch(e => {
                 console.log(e)
                 usersList.value = []
@@ -114,39 +78,47 @@ export default {
         })
 
         return {
-            value,
             usersList,
             usersData,
-            getListData,
-            getMonthData,
+            getUserTweets,
             getUserList,
             onExit
         }
     }
 }
 </script>
-<style scoped lang="less">
-.events {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-.events .ant-badge-status {
-    overflow: hidden;
-    white-space: nowrap;
-    width: 100%;
-    text-overflow: ellipsis;
+<style lang="less" scoped>
+  .container {
     font-size: 12px;
-}
-.notes-month {
-    text-align: center;
-    font-size: 28px;
-}
-.notes-month section {
-    font-size: 28px;
-}
-.header{
-    text-align: right;
-    padding: 10px;
-}
+    color: #666;
+
+    .w1210 {
+      width: 820px;
+      margin: 0 auto;
+    }
+
+    .bd {
+      margin-top: 2px;
+      overflow: hidden;
+      .aside-wrap {
+        float: left;
+        width: 210px;
+        margin-bottom: 20px;
+        :deep(.el-button) {
+          background-color: #f7f7f7;
+          color: #606266;
+          border: 1px solid #DCDFE6;
+          border-radius: 0;
+          &:hover {
+            color: red;
+          }
+        }
+      }
+      .detail {
+        float: right;
+        width: 600px;
+        min-height: 220px;
+      }
+    }
+  }
 </style>

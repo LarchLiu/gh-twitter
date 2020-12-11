@@ -1,6 +1,6 @@
 import service from './request'
 
-const base = './'
+const base = ''
 
 const postRequest = (url, payload = {}) => {
   return new Promise((resolve, reject) => {

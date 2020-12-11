@@ -1,6 +1,6 @@
 import API from '/@/utils/request-api'
 
-const base_url = '/twitter/'
+const base_url = './twitter/'
 
 function getUsersData() {
   return API.getRequest(base_url + 'userList.txt')
