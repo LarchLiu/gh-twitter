@@ -56,7 +56,7 @@ export default {
       }
     }
   },
-  setup (props) {
+  setup () {
     const mouseEnter = ref(false)
 
     const getTime = (timestamp) => {
