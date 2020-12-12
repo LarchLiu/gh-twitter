@@ -9,6 +9,7 @@
       <div class="detail">
         <div id="name">
           <span style="font-weight: 700; border: 0 solid black; margin-right: 10px">{{ tweet.Name }}</span>
+          <span v-if="tweet.IsRetweet">转推 </span>
           <span style="font-weight: 400; color: rgb(91, 112, 131);">
             {{ '@' + tweet.Username + ' · ' + getTime(tweet.Timestamp) }}
           </span>
