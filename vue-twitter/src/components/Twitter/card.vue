@@ -19,14 +19,19 @@
         </div>
         <div
           v-if="tweet.Photos && tweet.Photos.length > 0"
-          class="img"
+          class="image"
         >
-          <img
+          <a
             v-for="(img, i) in tweet.Photos"
             :key="i"
-            :src="img"
-            :width="500/(tweet.Photos.length > 2 ? 2 : tweet.Photos.length)"
+            :class="checkImgRadiusClass(i, tweet.Photos.length)"
           >
+            <img
+              :src="img"
+              :width="500/(tweet.Photos.length > 2 ? 2 : tweet.Photos.length)"
+              :class="checkImgMarginClass(i, tweet.Photos.length)"
+            >
+          </a>
         </div>
       </div>
     </div>
@@ -51,8 +56,47 @@ export default {
       return formatTime(timestamp, null)
     }
 
+    const checkImgRadiusClass = (idx, len) => {
+      idx++
+      const className = []
+      if (len === 1) {
+        className.push('lt-radius')
+        className.push('rt-radius')
+        className.push('lb-radius')
+        className.push('rb-radius')
+      } else {
+        if (idx === 1) {
+          className.push('lt-radius')
+        }
+        if (idx === 2) {
+          className.push('rt-radius')
+        }
+        if (idx === len - 1) {
+          className.push('lb-radius')
+        }
+        if (idx === len) {
+          className.push('rb-radius')
+        }
+      }
+      return className
+    }
+
+    const checkImgMarginClass = (idx, len) => {
+      const className = []
+      idx++
+      if (idx % 2) {
+        className.push('mg-right')
+      }
+      if (len > 2) {
+        className.push('mg-bottom')
+      }
+      return className
+    }
+
     return {
-      getTime
+      getTime,
+      checkImgRadiusClass,
+      checkImgMarginClass
     }
   }
 }
@@ -78,10 +122,33 @@ export default {
         float: right;
         width: 500px;
 
-        .img {
+        .image {
           margin-top: 10px;
-          img {
-            border-radius: 5px;
+          .lt-radius {
+            img {
+              border-top-left-radius: 10px;
+            }
+          }
+          .lb-radius {
+            img {
+              border-bottom-left-radius: 10px;
+            }
+          }
+          .rt-radius {
+            img {
+              border-top-right-radius: 10px;
+            }
+          }
+          .rb-radius {
+            img {
+              border-bottom-right-radius: 10px;
+            }
+          }
+          .mg-right {
+            margin-right: 2px;
+          }
+          .mg-bottom {
+            margin-bottom: 2px;
           }
         }
         .text {
