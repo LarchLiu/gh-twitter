@@ -14,7 +14,7 @@
                 :key="i"
                 @click="changeUser(i)"
               >
-                <h3>{{ user }}</h3>
+                <span :class="i === currentUser ? 'current' : 'normal'">{{ user }}</span>
               </div>
             </div>
           </aside-box>
@@ -100,7 +100,7 @@ export default {
 </script>
 <style lang="less" scoped>
   .container {
-    font-size: 12px;
+    font-size: 15px;
     color: #666;
 
     .w1210 {
@@ -114,15 +114,13 @@ export default {
       .aside-wrap {
         float: left;
         width: 210px;
+        font-weight: 500;
         margin-bottom: 20px;
-        :deep(.el-button) {
-          background-color: #f7f7f7;
-          color: #606266;
-          border: 1px solid #DCDFE6;
-          border-radius: 0;
-          &:hover {
-            color: red;
-          }
+        :deep(.current) {
+          color: rgb(29, 161, 242);
+        }
+        :deep(.normal) {
+          color: black;
         }
       }
       .detail {
