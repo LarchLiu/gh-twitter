@@ -55,7 +55,7 @@ export default {
   methods: {
     handleFixedChange(val) {
       this.fixed = val
-      this.pop_display = false
+      this.pop_display = true
     },
     handleMouseEnter() {
       if (this.fixed) {
@@ -64,7 +64,7 @@ export default {
     },
     handleMouseLeave() {
       if (this.fixed) {
-        this.pop_display = false
+        this.pop_display = true
       }
     }
   }

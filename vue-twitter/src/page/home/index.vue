@@ -4,7 +4,7 @@
       <div class="bd">
         <div class="aside-wrap">
           <aside-box
-            title="Twitter"
+            title="GH Twitter"
             :need-fixed="true" 
             id-name="header"
           >
