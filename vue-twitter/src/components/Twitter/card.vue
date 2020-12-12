@@ -1,5 +1,9 @@
 <template>
-  <div class="card">
+  <div
+    :class="[ 'card', mouseEnter ? 'enter' : '']"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+  >
     <div class="head">
       <a-avatar
         class="avatar"
@@ -39,6 +43,7 @@
 </template>
 
 <script>
+import { ref } from 'vue';
 import { formatTime } from "/@/utils/index.js"
 
 export default {
@@ -52,6 +57,8 @@ export default {
     }
   },
   setup (props) {
+    const mouseEnter = ref(false)
+    
     const getTime = (timestamp) => {
       return formatTime(timestamp, null)
     }
@@ -93,10 +100,19 @@ export default {
       return className
     }
 
+    const handleMouseEnter = () => {
+      mouseEnter.value = true
+    }
+    const handleMouseLeave = () => {
+      mouseEnter.value = false
+    }
+
     return {
       getTime,
       checkImgRadiusClass,
-      checkImgMarginClass
+      checkImgMarginClass,
+      handleMouseEnter,
+      handleMouseLeave
     }
   }
 }
@@ -165,7 +181,9 @@ export default {
         }
       }
     }
-
+  }
+  .enter {
+    background: rgb(247, 247, 247);
   }
 </style>
 
