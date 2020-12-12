@@ -8,10 +8,11 @@
             :need-fixed="true" 
             id-name="header"
           >
-            <div v-if="usersList">
+            <div v-if="usersListSort">
               <div
-                v-for="user in usersList"
-                :key="user"
+                v-for="(user, i) in usersListSort"
+                :key="i"
+                @click="changeUser(i)"
               >
                 <h3>{{ user }}</h3>
               </div>
@@ -20,7 +21,7 @@
         </div>
         <twitter
           class="detail"
-          :detail="usersData ? usersData[0] : {}"
+          :detail="usersData ? usersData[currentUser] : {}"
         />
       </div>
     </div>
@@ -28,7 +29,7 @@
 </template>
 <script>
 import { ref,getCurrentInstance, onMounted, watch } from 'vue';
-import userApi from '/@/api/twitter/user';
+import twitterApi from '/@/api/twitter/index';
 import AsideBox from '/@/components/AsideBox/index.vue';
 import Twitter from '/@/components/Twitter/index.vue';
 
@@ -40,6 +41,8 @@ export default {
         const { ctx } = getCurrentInstance();
         const usersList = ref([])
         const usersData = ref([])
+        const usersListSort = ref([])
+        const currentUser = ref(0)
 
         const onExit = ()=>{
             ctx.$router.push({
@@ -48,7 +51,7 @@ export default {
         }
 
         const getUserList = ()=> {
-            userApi.getUsersData().then(res => {
+            twitterApi.getUsersData().then(res => {
                 console.log(usersList.value)
                 usersList.value = res.replace(/\s*/g,"").split(',')
                 console.log(usersList.value)
@@ -59,12 +62,17 @@ export default {
         }
 
         const getUserTweets = (user) => {
-            userApi.getTweetsData(user).then(data => {
+            twitterApi.getTweetsData(user).then(data => {
                 usersData.value.push(data)
+                usersListSort.value.push(data.Profile.Name)
                 console.log(data)
             }).catch(err => {
                 console.log(err)
             })
+        }
+
+        const changeUser = (i) => {
+          currentUser.value = i
         }
 
         onMounted(() => {
@@ -78,10 +86,13 @@ export default {
         })
 
         return {
+            currentUser,
             usersList,
             usersData,
+            usersListSort,
             getUserTweets,
             getUserList,
+            changeUser,
             onExit
         }
     }

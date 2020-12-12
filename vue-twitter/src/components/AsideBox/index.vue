@@ -103,7 +103,7 @@ export default {
       text-align: left;
       &.pop-display {
         position:fixed;
-        top:40px;
+        top:45px;
         width: 210px;
         z-index:999;
         background-color: white;
