@@ -28,7 +28,7 @@
           >
             <img
               :src="img"
-              :width="500/(tweet.Photos.length > 2 ? 2 : tweet.Photos.length)"
+              :width="(500 - (tweet.Photos.length > 1 ? 2 : 0))/(tweet.Photos.length > 2 ? 2 : tweet.Photos.length)"
               :class="checkImgMarginClass(i, tweet.Photos.length)"
             >
           </a>
