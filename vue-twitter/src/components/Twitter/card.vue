@@ -58,7 +58,7 @@ export default {
   },
   setup (props) {
     const mouseEnter = ref(false)
-    
+
     const getTime = (timestamp) => {
       return formatTime(timestamp, null)
     }
@@ -109,6 +109,7 @@ export default {
 
     return {
       getTime,
+      mouseEnter,
       checkImgRadiusClass,
       checkImgMarginClass,
       handleMouseEnter,
