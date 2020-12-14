@@ -2,6 +2,8 @@ name: twitter scraper
 on:
   schedule:
     - cron:  '0 * * * *'
+  repository_dispatch:
+    types: scraper
   workflow_dispatch:
 
 jobs:
