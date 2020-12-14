@@ -1,4 +1,4 @@
-name: Go
+name: twitter scraper
 on:
   schedule:
     - cron:  '0 * * * *'
@@ -6,8 +6,7 @@ on:
 
 jobs:
 
-  test:
-    name: Test
+  scraper:
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
 
