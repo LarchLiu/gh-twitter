@@ -1,0 +1,24 @@
+name: user change
+on:
+  repository_dispatch:
+    types: [changeuser]
+
+jobs:
+
+  scraper:
+    runs-on: ubuntu-latest
+
+    env:
+      TZ: Asia/Shanghai
+
+    steps:
+
+    - name: Set up Go 1.12
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.12
+      id: go
+
+    - name: test
+      run: |
+        echo user change test!
