@@ -32,7 +32,7 @@
           >
             <img
               :src="img"
-              :width="(500 - (tweet.Photos.length > 1 ? 2 : 0))/(tweet.Photos.length > 2 ? 2 : tweet.Photos.length)"
+              :width="checkImgWidth(i, tweet.Photos.lengths)"
               :class="checkImgMarginClass(i, tweet.Photos.length)"
             >
           </a>
@@ -78,11 +78,18 @@ export default {
         if (idx === 2) {
           className.push('rt-radius')
         }
-        if (idx === len - 1) {
-          className.push('lb-radius')
-        }
-        if (idx === len) {
-          className.push('rb-radius')
+        if (len % 2) {
+          if (idx === len) {
+            className.push('lb-radius')
+            className.push('rb-radius')
+          }
+        } else {
+          if (idx === len - 1) {
+            className.push('lb-radius')
+          }
+          if (idx === len) {
+            className.push('rb-radius')
+          }
         }
       }
       return className
@@ -100,6 +107,14 @@ export default {
       return className
     }
 
+    const checkImgWidth = (idx, len) => {
+      if (len % 2 && idx == len - 1) {
+        return 500
+      } else {
+        return (500 - (len > 1 ? 2 : 0))/(len > 2 ? 2 : len)
+      }
+    }
+
     const handleMouseEnter = () => {
       mouseEnter.value = true
     }
@@ -113,7 +128,8 @@ export default {
       checkImgRadiusClass,
       checkImgMarginClass,
       handleMouseEnter,
-      handleMouseLeave
+      handleMouseLeave,
+      checkImgWidth
     }
   }
 }
