@@ -32,7 +32,7 @@
           >
             <img
               :src="img"
-              :width="checkImgWidth(i, tweet.Photos.lengths)"
+              :width="checkImgWidth(i, tweet.Photos.length)"
               :class="checkImgMarginClass(i, tweet.Photos.length)"
             >
           </a>
