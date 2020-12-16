@@ -3,7 +3,7 @@ on:
   schedule:
     - cron:  '0 * * * *'
   repository_dispatch:
-    types: scraper
+    types: [scraper]
   workflow_dispatch:
 
 jobs:
