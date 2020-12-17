@@ -16,11 +16,13 @@ import (
 	twitterscraper "github.com/n0madic/twitter-scraper"
 )
 
+// Twitter represents a struct of twitter.
 type Twitter struct {
 	Profile twitterscraper.Profile
 	Tweets  []twitterscraper.Tweet
 }
 
+// GetFileContent get file content from filePath.
 func GetFileContent(filePath string) (string, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
@@ -50,8 +52,6 @@ func randFileName(dirPath string, suffix string) (fileName string) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			return fileName
-		} else {
-			return randFileName(dirPath, suffix)
 		}
 	}
 	return randFileName(dirPath, suffix)
@@ -147,10 +147,10 @@ func main() {
 		}
 
 		if profile.Avatar != "" {
-			file := writeImage(picPath, profile.Avatar)
-			file = strings.Replace(file, "raw", ".", 1)
-			fmt.Print(file)
-			profile.Avatar = file
+			filePath := writeImage(picPath, profile.Avatar)
+			filePath = strings.Replace(filePath, "raw", ".", 1)
+			fmt.Print(filePath)
+			profile.Avatar = filePath
 		}
 		twitter.Profile = profile
 		count := 0
@@ -158,10 +158,10 @@ func main() {
 			if tweet.Tweet.Photos != nil && len(tweet.Tweet.Photos) > 0 {
 				var photos []string
 				for _, src := range tweet.Tweet.Photos {
-					file := writeImage(picPath, src)
-					file = strings.Replace(file, "raw", ".", 1)
-					fmt.Print(file)
-					photos = append(photos, file)
+					filePath := writeImage(picPath, src)
+					filePath = strings.Replace(filePath, "raw", ".", 1)
+					fmt.Print(filePath)
+					photos = append(photos, filePath)
 				}
 				tweet.Tweet.Photos = photos
 			}
