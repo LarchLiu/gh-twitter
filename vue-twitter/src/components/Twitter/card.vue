@@ -37,6 +37,9 @@
             >
           </a>
         </div>
+        <div class="text">
+          <span>{{ tweet.Text }}</span>
+        </div>
       </div>
     </div>
   </div>
