@@ -3,8 +3,11 @@ github.com/PuerkitoBio/goquery v1.5.1/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBK
 github.com/andybalholm/cascadia v1.1.0 h1:BuuO6sSfQNFRu1LppgbD25Hr2vLYW25JvxHs5zzsLTo=
 github.com/andybalholm/cascadia v1.1.0/go.mod h1:GsXiBklL0woXo1j/WYWtSYYC4ouU9PqHO0sqidkEA4Y=
 github.com/google/go-cmp v0.4.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
+github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/n0madic/twitter-scraper v0.0.0-20201109091442-a5bcf09531d2 h1:eqz1YGT7dbdO6hUkaIEaKBXA3WRzq0fKvAp4fmQiFDc=
 github.com/n0madic/twitter-scraper v0.0.0-20201109091442-a5bcf09531d2/go.mod h1:VZADi02o1/HsNTTCPqT8kFK+RGwzVdYVdpatmzJ6Ap4=
+github.com/n0madic/twitter-scraper v0.0.0-20201217095613-7628f22c6ca3 h1:WuCpy9Tkk/8Z7WsJEuhexPzQKACj5Ua29kCPEEy3zRQ=
+github.com/n0madic/twitter-scraper v0.0.0-20201217095613-7628f22c6ca3/go.mod h1:uzFP7WK9gCykBnULzfmxScXgIbs+423tWjbHRLYVq/g=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/net v0.0.0-20180218175443-cbe0f9307d01/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20200202094626-16171245cfb2 h1:CCH4IOTTfewWjGOlSp+zGcjutRKlBEZQ6wTn8ozI/nI=
