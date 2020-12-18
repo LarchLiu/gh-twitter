@@ -41,7 +41,7 @@ jobs:
     - name: Go run
       run: |
         cd twitter-json
-        go run tweets.go
+        go run main.go
 
     - name: Git push
       run: |
