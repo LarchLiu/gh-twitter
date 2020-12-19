@@ -2,10 +2,9 @@ import axios from 'axios'
 import { message } from 'ant-design-vue'
 // import router from '@/router'
 
-const base_url = import.meta.env.VITE_GLOB_API_URL
 // create an axios instance
 const service = axios.create({
-  baseURL: base_url, // url = base url + request url
+  baseURL: process.env.VUE_APP_GLOB_API_URL, // url = base url + request url
   withCredentials: true, // send cookies when cross-domain requests
   timeout: 60000 // request timeout
 })

@@ -5,7 +5,7 @@
         <div class="aside-wrap">
           <aside-box
             title="GH Twitter"
-            :need-fixed="true" 
+            :need-fixed="true"
             id-name="header"
           >
             <div v-if="usersListSort">
@@ -28,74 +28,82 @@
   </div>
 </template>
 <script>
-import { ref,getCurrentInstance, onMounted, watch } from 'vue';
-import twitterApi from '/@/api/twitter/index';
-import AsideBox from '/@/components/AsideBox/index.vue';
-import Twitter from '/@/components/Twitter/index.vue';
-
+import { ref, getCurrentInstance, onMounted, watch } from 'vue'
+import twitterApi from '@/api/twitter/index'
+import AsideBox from '@/components/AsideBox/index.vue'
+import Twitter from '@/components/Twitter/index.vue'
+import Octokit from '@/http/github'
 
 export default {
-    components: { AsideBox, Twitter },
-    setup () {
+  components: { AsideBox, Twitter },
+  setup () {
+    const { ctx } = getCurrentInstance()
+    const usersList = ref([])
+    const usersData = ref([])
+    const usersListSort = ref([])
+    const currentUser = ref(0)
 
-        const { ctx } = getCurrentInstance();
-        const usersList = ref([])
-        const usersData = ref([])
-        const usersListSort = ref([])
-        const currentUser = ref(0)
-
-        const onExit = ()=>{
-            ctx.$router.push({
-                path: '/login'
-            })
-        }
-
-        const getUserList = ()=> {
-            twitterApi.getUsersData().then(res => {
-                console.log(usersList.value)
-                usersList.value = res.replace(/\s*/g,"").split(',')
-                console.log(usersList.value)
-            }).catch(e => {
-                console.log(e)
-                usersList.value = []
-            })
-        }
-
-        const getUserTweets = (user) => {
-            twitterApi.getTweetsData(user).then(data => {
-                usersData.value.push(data)
-                usersListSort.value.push(data.Profile.Name)
-                console.log(data)
-            }).catch(err => {
-                console.log(err)
-            })
-        }
-
-        const changeUser = (i) => {
-          currentUser.value = i
-        }
-
-        onMounted(() => {
-          getUserList()
-        })
-        watch(usersList, () => {
-            usersData.value = []
-            for (let i = 0; i < usersList.value.length; i++) {
-                getUserTweets(usersList.value[i])
-            }
-        })
-
-        return {
-            currentUser,
-            usersList,
-            usersData,
-            usersListSort,
-            getUserTweets,
-            getUserList,
-            changeUser,
-            onExit
-        }
+    const onExit = () => {
+      ctx.$router.push({
+        path: '/login'
+      })
     }
+
+    const webhook = () => {
+      Octokit.request('POST /repos/LarchLiu/gh-twitter/dispatches', {
+        event_type: 'scraper'
+      })
+      console.log(process.env.VUE_APP_GITHUB_TOKEN)
+    }
+
+    const getUserList = () => {
+      twitterApi.getUsersData().then(res => {
+        console.log(usersList.value)
+        usersList.value = res.replace(/\s*/g, '').split(',')
+        console.log(usersList.value)
+      }).catch(e => {
+        console.log(e)
+        usersList.value = []
+      })
+    }
+
+    const getUserTweets = (user) => {
+      twitterApi.getTweetsData(user).then(data => {
+        usersData.value.push(data)
+        usersListSort.value.push(data.Profile.Name)
+        console.log(data)
+      }).catch(err => {
+        console.log(err)
+      })
+    }
+
+    const changeUser = (i) => {
+      currentUser.value = i
+    }
+
+    onMounted(() => {
+      getUserList()
+    })
+
+    watch(usersList, () => {
+      usersData.value = []
+      for (let i = 0; i < usersList.value.length; i++) {
+        getUserTweets(usersList.value[i])
+      }
+    })
+
+    return {
+      currentUser,
+      usersList,
+      usersData,
+      usersListSort,
+      getUserTweets,
+      getUserList,
+      changeUser,
+      onExit,
+      webhook
+    }
+  }
 }
 </script>
 <style lang="less" scoped>

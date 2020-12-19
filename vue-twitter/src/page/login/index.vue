@@ -1,18 +1,18 @@
 <template>
     <div class="login">
-        <a-form :label-col="labelCol" :wrapper-col="wrapperCol"> 
-            <a-form-item 
+        <a-form :label-col="labelCol" :wrapper-col="wrapperCol">
+            <a-form-item
             class="form-tem"
-            required 
-            label="用户名" 
+            required
+            label="用户名"
             v-bind="validateInfos.userName">
                 <a-input v-model:value="form.userName"  :placeholder="namePlacholder" />
             </a-form-item>
-            
-            <a-form-item 
-            class="form-tem" 
-            required 
-            label="密码" 
+
+            <a-form-item
+            class="form-tem"
+            required
+            label="密码"
             v-bind="validateInfos.password">
                 <a-input v-model:value="form.password" :placeholder="passWordPlacholder" />
             </a-form-item>
@@ -30,69 +30,67 @@
     </div>
 </template>
 <script>
-import { ref,getCurrentInstance, reactive } from 'vue';
-import { useForm } from '@ant-design-vue/use';
+import { getCurrentInstance, reactive } from 'vue'
+import { useForm } from '@ant-design-vue/use'
 
 export default {
-    setup () {
+  setup () {
+    // 路由实例
+    const { ctx } = getCurrentInstance()
+    const labelCol = { span: 4 }
+    const wrapperCol = { span: 14 }
 
-        // 路由实例
-        const { ctx } = getCurrentInstance()
-        let labelCol =  { span: 4 }
-        let wrapperCol =  { span: 14 }
+    // form表单内容
+    const form = reactive({
+      userName: '',
+      password: ''
+    })
+    // placholder
+    const namePlacholder = 'Please enter your name'
+    const passWordPlacholder = 'Please enter your passWord'
 
-        // form表单内容
-        let form = reactive({
-            userName: '',
-            password: '',
+    // 校验规则
+    const rulesRef = reactive({
+      userName: [
+        {
+          required: true,
+          message: namePlacholder
+        }
+      ],
+      password: [
+        {
+          required: true,
+          message: passWordPlacholder
+        }
+      ]
+    })
+
+    const { resetFields, validate, validateInfos } = useForm(form, rulesRef)
+
+    // submit
+    const onSubmit = (e) => {
+      e.preventDefault()
+
+      validate()
+        .then(() => {
+          ctx.$router.push({
+            path: '/'
+          })
         })
-        //placholder
-        let namePlacholder = 'Please enter your name'
-        let passWordPlacholder = 'Please enter your passWord'
-        
-
-        // 校验规则
-        const rulesRef = reactive({
-            userName: [
-                {
-                    required: true,
-                    message: namePlacholder
-                },
-            ],
-            password: [
-                {
-                    required: true,
-                    message: passWordPlacholder,
-                },
-            ]
-        });
-        
-        const { resetFields, validate,validateInfos } = useForm(form, rulesRef);
-
-        // submit
-        const onSubmit = (e)=>{
-            e.preventDefault();
-
-            validate()
-            .then(() => {
-                ctx.$router.push({
-                    path: '/'
-                })
-            })   
-        }
-     
-        return {
-            labelCol,
-            wrapperCol,
-            form,
-            namePlacholder,
-            passWordPlacholder,
-            onSubmit,
-            validateInfos,
-            resetFields
-        }
     }
-};
+
+    return {
+      labelCol,
+      wrapperCol,
+      form,
+      namePlacholder,
+      passWordPlacholder,
+      onSubmit,
+      validateInfos,
+      resetFields
+    }
+  }
+}
 </script>
 <style lang="less" scoped>
     .login{

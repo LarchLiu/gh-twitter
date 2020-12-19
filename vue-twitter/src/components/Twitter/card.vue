@@ -43,15 +43,15 @@
 </template>
 
 <script>
-import { ref } from 'vue';
-import { formatTime } from "/@/utils/index.js"
+import { ref } from 'vue'
+import { formatTime } from '@/utils/index.js'
 
 export default {
   name: 'Card',
   props: {
     tweet: {
       type: Object,
-      default() {
+      default () {
         return {}
       }
     }
@@ -138,8 +138,7 @@ export default {
 <style lang="less" scoped>
   .card {
     padding: 10px 10px;
-    border: 1px solid #eee;
-    border-top: none;
+    border-bottom: 1px solid #eee;
     overflow: hidden;
     text-align: left;
     font-size: 15px;
@@ -203,4 +202,3 @@ export default {
     background: rgb(247, 247, 247);
   }
 </style>
-

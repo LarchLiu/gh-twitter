@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import FixedHeader from '/@/components/FixedHeader/index.vue'
+import FixedHeader from '@/components/FixedHeader/index.vue'
 
 export default {
   name: 'AsideBox',
@@ -46,23 +46,23 @@ export default {
       default: 'aside'
     }
   },
-  data() {
+  data () {
     return {
       fixed: false,
       pop_display: true
     }
   },
   methods: {
-    handleFixedChange(val) {
+    handleFixedChange (val) {
       this.fixed = val
       this.pop_display = true
     },
-    handleMouseEnter() {
+    handleMouseEnter () {
       if (this.fixed) {
         this.pop_display = true
       }
     },
-    handleMouseLeave() {
+    handleMouseLeave () {
       if (this.fixed) {
         this.pop_display = true
       }

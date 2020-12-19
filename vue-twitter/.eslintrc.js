@@ -1,30 +1,17 @@
 module.exports = {
-  parser: 'vue-eslint-parser',
-
-  extends: [
-    'plugin:vue/vue3-recommended',
-  ],
-  rules: {
-    'vue/custom-event-name-casing': 'off',
-    'no-use-before-define': 'off',
-    // 'no-setting-before-define': [
-    //   'error',
-    //   {
-    //     functions: false,
-    //     classes: true,
-    //   },
-    // ],
-
-    'no-unused-vars': [
-      'error',
-      {
-        argsIgnorePattern: '^h$',
-        varsIgnorePattern: '^h$',
-      },
-    ],
-    'space-before-function-paren': 'off',
-    'selector-pseudo-element-no-unknown': ['off', {
-      'ignorePseudoElements': ['v-deep']
-    }]
+  root: true,
+  env: {
+    node: true
   },
-};
+  extends: [
+    'plugin:vue/vue3-essential',
+    '@vue/standard'
+  ],
+  parserOptions: {
+    parser: 'babel-eslint'
+  },
+  rules: {
+    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
+  }
+}

@@ -1,13 +1,13 @@
-import API from '/@/utils/request-api'
+import API from '@/utils/request-api'
 
-const base_url = './twitter/'
+const baseUrl = './twitter/'
 
-function getUsersData() {
-  return API.getRequest(base_url + 'userList.txt')
+function getUsersData () {
+  return API.getRequest(baseUrl + 'userList.txt')
 }
 
-function getTweetsData(user) {
-  return API.getRequest(base_url + user + '.json')
+function getTweetsData (user) {
+  return API.getRequest(baseUrl + user + '.json')
 }
 
 export default {

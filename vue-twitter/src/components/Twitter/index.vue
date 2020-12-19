@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import FixedHeader from '/@/components/FixedHeader/index.vue';
+import FixedHeader from '@/components/FixedHeader/index.vue'
 import Card from './card.vue'
 
 export default {
@@ -72,7 +72,7 @@ export default {
     },
     detail: {
       type: Object,
-      default() {
+      default () {
         return {}
       }
     }
@@ -107,7 +107,6 @@ export default {
       }
     }
     .content {
-      padding: 10px 10px;
       border: 1px solid #eee;
       border-top: none;
       overflow: hidden;
@@ -116,13 +115,13 @@ export default {
 
       .profile {
         .name {
-          margin-bottom: 10px;
+          padding: 10px 10px;
         }
         .biography {
-          margin-bottom: 10px;
+          padding: 0 10px;
         }
         .follow {
-          margin-bottom: 10px;
+          padding: 10px 10px;
         }
         .link-top {
           width: 100%;

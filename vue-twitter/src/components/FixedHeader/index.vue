@@ -38,7 +38,7 @@ export default {
       default: false
     }
   },
-  data() {
+  data () {
     return {
       id_name_pre: 'fixed-',
       fixed: false,
@@ -47,28 +47,28 @@ export default {
     }
   },
   computed: {
-    offset_top() {
+    offset_top () {
       return this.getElementToPageTop(this.fixed_element)
     },
-    id_name() {
+    id_name () {
       return this.id_name_pre + this.idName
     }
   },
   watch: {
-    fixed(val) {
+    fixed (val) {
       if (this.childClassName && this.fixed_element) {
         val ? this.addFixedClass(this.fixed_element, this.styleClassName) : this.removeFixedClass(this.fixed_element, this.styleClassName)
       }
       this.$emit('change', val)
     }
   },
-  mounted() {
+  mounted () {
     window.addEventListener('scroll', _.throttle(this.handleScroll, 50))
-    const element = document.querySelector(`#${this.id_name}`)
+    const element = document.querySelector('#' + this.id_name)
     if (this.childClassName) {
-      const child_element = element.querySelector(`.${this.childClassName}`)
-      if (child_element) {
-        this.fixed_element = child_element
+      const childElement = element.querySelector('.' + this.childClassName)
+      if (childElement) {
+        this.fixed_element = childElement
       } else {
         console.log('class name of child node not exist, please check it')
         this.fixed_element = element
@@ -81,17 +81,17 @@ export default {
       window.addEventListener('resize', _.throttle(this.resizeHandler, 50))
     }
   },
-  unmounted() {
+  unmounted () {
     window.removeEventListener('scroll', this.handleScroll)
     if (this.widthSelf) {
       window.removeEventListener('resize', this.resizeHandler)
     }
   },
   methods: {
-    resizeHandler() {
+    resizeHandler () {
       this.fixed_element_width = this.fixed_element.offsetWidth
     },
-    getElementToPageTop(el) {
+    getElementToPageTop (el) {
       let top = 0
       while (el !== window.document.body && el) {
         top += el.offsetTop
@@ -99,14 +99,14 @@ export default {
       }
       return top
     },
-    addFixedClass(dom, cls) {
-      const arr_class_name = dom.className.split(' ')
-      const index = this.arrIndexOf(arr_class_name, cls)
+    addFixedClass (dom, cls) {
+      const arrClassName = dom.className.split(' ')
+      const index = this.arrIndexOf(arrClassName, cls)
       if (index === -1) {
         dom.className += ' ' + cls
       }
     },
-    removeFixedClass(dom, cls) {
+    removeFixedClass (dom, cls) {
       if (dom.className !== '') {
         const arrClassName = dom.className.split(' ')
         const index = this.arrIndexOf(arrClassName, cls)
@@ -116,7 +116,7 @@ export default {
         }
       }
     },
-    arrIndexOf(arr, v) {
+    arrIndexOf (arr, v) {
       for (let i = 0; i < arr.length; i++) {
         if (arr[i] === v) {
           return i
@@ -124,7 +124,7 @@ export default {
       }
       return -1
     },
-    handleScroll() {
+    handleScroll () {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
       this.fixed = scrollTop > this.offset_top
     }
