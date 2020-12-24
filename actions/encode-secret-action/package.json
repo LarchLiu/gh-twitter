@@ -1,0 +1,30 @@
+{
+  "name": "encode-secret-action",
+  "version": "0.1.1",
+  "description": "A GitHub Action to encode secret by btoa",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=12.16.3",
+    "npm": ">=6.14.4"
+  },
+  "scripts": {
+    "build": "ncc build index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LarchLiu/encode-secret-action.git"
+  },
+  "keywords": [],
+  "author": "lachliu",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@types/btoa": "^1.2.3",
+    "btoa": "^1.2.1"
+  },
+  "bugs": {
+    "url": "https://github.com/LarchLiu/encode-secret-action/issues"
+  },
+  "homepage": "https://github.com/LarchLiu/encode-secret-action#readme"
+}

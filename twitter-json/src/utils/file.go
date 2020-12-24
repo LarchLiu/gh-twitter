@@ -29,11 +29,23 @@ func GetFileContent(filePath string) (string, error) {
 	return string(b), nil
 }
 
-// WriteImage save image to dirPath.
-func WriteImage(dirPath string, href string) string {
+// GetImageInfo get image file path and file name.
+func GetImageInfo(dirPath string, href string) (filePath string, fileName string, err error) {
+	_, err = os.Stat(dirPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(dirPath, os.ModePerm)
+			if err != nil {
+				fmt.Println(err)
+				return "", "", err
+			}
+		} else {
+			return "", "", err
+		}
+	}
 	var suffix string
 	var name string
-	var fileName string
+
 	i := strings.LastIndex(href, "/")
 	nameReg := regexp.MustCompile(`\/(.*?)(\.|\?)(?s)`)
 	formatReg := regexp.MustCompile(`(?s)format=(.*?)&(?s)`)
@@ -43,59 +55,57 @@ func WriteImage(dirPath string, href string) string {
 		// such like https://pbs.twimg.com/media/Eo9bCnnXcAAE_Wz?format=jpg&name=large
 		name = nameReg.FindStringSubmatch(href[i:])[1]
 		suffix = formatReg.FindStringSubmatch(href)[1]
-		fileName = path.Join(dirPath, name+"."+suffix)
-		fmt.Printf("fileName %s\n", fileName)
-		_, err := os.Stat(fileName)
-		if err == nil {
-			return fileName
-		}
+		fileName = name + "." + suffix
+		filePath = path.Join(dirPath, fileName)
+		// fmt.Printf("filePath %s\n", filePath)
 	} else if suffixReg.MatchString(href) {
 		// such like https://pbs.twimg.com/profile_images/1333096463916797954/7bzarkH2_normal.jpg
 		j := strings.LastIndex(href, "/") + 1
-		name = href[j:]
-		fileName = path.Join(dirPath, name)
-		_, err := os.Stat(fileName)
-		fmt.Printf("fileName %s\n", fileName)
-		if err == nil {
-			return fileName
-		}
+		fileName = href[j:]
+		filePath = path.Join(dirPath, fileName)
+		// fmt.Printf("fileName %s\n", filePath)
 	} else {
 		suffix = "jpg"
-		fileName = randFileName(dirPath, suffix)
+		filePath, fileName = randFileName(dirPath, suffix)
 	}
-	imageFile, err := os.Create(fileName)
+	return filePath, fileName, nil
+}
+
+// WriteImage save image to dirPath.
+func WriteImage(filePath string, href string) (err error) {
+	imageFile, err := os.Create(filePath)
 	if err != nil {
-		fmt.Printf("[writeImage create file]: fileName: %s\n href: %s\nerror: %s\n", fileName, href, err.Error())
-		return ""
+		fmt.Printf("[writeImage create file]: filePath: %s\n href: %s\nerror: %s\n", filePath, href, err.Error())
+		return err
 	}
 	resp, err := http.Get(href)
 	if err != nil {
-		fmt.Printf("[writeImage http.Get: fileName]: %s\nhref: %s\n error: %s\n", fileName, href, err.Error())
-		os.Remove(fileName)
-		return ""
+		fmt.Printf("[writeImage http.Get: filePath]: %s\nhref: %s\n error: %s\n", filePath, href, err.Error())
+		os.Remove(filePath)
+		return err
 	}
 	size, err := io.Copy(imageFile, resp.Body)
 	if err != nil {
 		fmt.Printf("io.Copy:error: %s  href: %s\n", err.Error(), href)
-		os.Remove(fileName)
+		os.Remove(filePath)
 	}
 	fmt.Printf("Get From %s: %d bytes\n", href, size)
-	return fileName
+	return nil
 }
 
-func randFileName(dirPath string, suffix string) (fileName string) {
+func randFileName(dirPath string, suffix string) (filePath string, fileName string) {
 	var randChar string = "abcdefghimnjkqzxyt0123456789ioedkaldncalew0129387iue"
 	var name string
 	size := len(randChar)
 	for i := 0; i < 12; i++ {
 		name += string(randChar[rand.Intn(size)])
 	}
-	fileName = path.Join(dirPath, name)
-	fileName += "." + suffix
-	_, err := os.Stat(fileName)
+	fileName = name + "." + suffix
+	filePath = path.Join(dirPath, fileName)
+	_, err := os.Stat(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return fileName
+			return filePath, fileName
 		}
 	}
 	return randFileName(dirPath, suffix)

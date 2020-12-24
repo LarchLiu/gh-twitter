@@ -1,0 +1,28 @@
+{
+  "name": "settings-for-action",
+  "version": "0.1.1",
+  "description": "A GitHub Action to get settings for action from json file",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=12.16.3",
+    "npm": ">=6.14.4"
+  },
+  "scripts": {
+    "build": "ncc build index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LarchLiu/settings-for-action.git"
+  },
+  "keywords": [],
+  "author": "lachliu",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.6"
+  },
+  "bugs": {
+    "url": "https://github.com/LarchLiu/settings-for-action/issues"
+  },
+  "homepage": "https://github.com/LarchLiu/settings-for-action#readme"
+}

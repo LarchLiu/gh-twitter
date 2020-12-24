@@ -1,0 +1,12 @@
+name: Encode Access Token
+description: Encode an access token
+inputs:
+  access_token:
+    description: An existing, valid access token
+    required: true
+outputs:
+  access_token:
+    description: The encode access token
+runs:
+  using: node12
+  main: dist/index.js

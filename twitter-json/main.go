@@ -8,19 +8,113 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"time"
+	"twitter-json/src/model"
 	"twitter-json/src/utils"
 
+	"github.com/caarlos0/env/v6"
 	twitterscraper "github.com/n0madic/twitter-scraper"
+	"github.com/qiniu/qmgo"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
+func checkImageExist(picBed string, coll *qmgo.Collection, user string, path string, name string) (exist bool, ret utils.DbImage, ghPath string) {
+	pathReg := regexp.MustCompile(`(?s)twitter-json/raw(.*?)$`)
+	ghPath = "." + pathReg.FindStringSubmatch(path)[1]
+	ret = utils.DbImage{User: user}
+	if picBed == "github" {
+		_, err := os.Stat(path)
+		if err == nil {
+			exist = true
+		} else {
+			exist = false
+		}
+		ret.Key = ghPath
+	} else {
+		e, key := model.DbCheckImageExist(coll, fmt.Sprintf("%s/%s/%s", "resource/twitter", user, name))
+		exist = e
+		ret.Key = key
+	}
+
+	return exist, ret, ghPath
+}
+
+func uploadImage(picBed string, coll *qmgo.Collection, user string, path string, key string) (ret utils.DbImage, err error) {
+	ret = utils.DbImage{Key: key, User: user}
+	if picBed == "qiniu" {
+		retQiniu, err := model.QiniuUpload(path, key)
+		if err != nil {
+			return ret, err
+		}
+		ret.Key = retQiniu.URL
+		os.Remove(path)
+	}
+	dbImg := utils.DbImage{Key: key, User: user}
+	model.DbInsertImage(coll, dbImg)
+	return ret, nil
+}
+
+func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user string, src string) (htmlSrc string) {
+	localPath, fileName, err := utils.GetImageInfo(picDir+user, src)
+	if err != nil {
+		fmt.Println(err)
+	}
+	exit, ret, ghPath := checkImageExist(picBed, coll, user, localPath, fileName)
+	if exit {
+		if picBed == "github" {
+			htmlSrc = ret.Key
+		} else {
+			if picBed == "qiniu" {
+				htmlSrc = model.QiniuMakeURL(ret.Key)
+			} else {
+				htmlSrc = ret.Key
+			}
+		}
+	} else {
+		err := utils.WriteImage(localPath, src)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			if picBed == "github" {
+				htmlSrc = ret.Key
+				fmt.Printf("filePath %s\n", ret.Key)
+			} else {
+				retUpload, err := uploadImage(picBed, coll, user, localPath, ret.Key)
+				if err != nil {
+					// 上传失败用 github 资源
+					htmlSrc = ghPath
+				} else {
+					htmlSrc = retUpload.Key
+				}
+			}
+		}
+	}
+	return htmlSrc
+}
+
 func main() {
+	cfg := utils.Settings{}
+	if err := env.Parse(&cfg); err != nil {
+		fmt.Printf("%+v\n", err)
+	}
+	fmt.Printf("%+v\n", cfg)
+
+	ctx := context.Background()
+	cli := model.DbInit()
+	collProfile := model.DbColl(cli, "profile")
+	collTweet := model.DbColl(cli, "tweets")
+	collImage := model.DbColl(cli, "images")
+	defer func() {
+		model.DbClose(cli)
+	}()
+
 	var users []string
 	dir, _ := os.Getwd()
-	twitterPath := path.Join(dir, "./raw/twitter/") + "/"
-	picPath := twitterPath + "images"
+	twitterDir := path.Join(dir, "./raw/twitter/") + "/"
+	picDir := twitterDir + "images/"
+	// pathReg := regexp.MustCompile(`(?s)twitter-json/raw(.*?)$`)
 	imgReg := regexp.MustCompile(`(?s)(\<br\>\<a href=(.*)\>\<img(.*)\<\/a\>)(?s)`)
-	pathReg := regexp.MustCompile(`(?s)twitter-json/raw(.*?)$`)
-	f, err := utils.GetFileContent(twitterPath + "userList.txt")
+	f, err := utils.GetFileContent(twitterDir + "userList.txt")
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -29,30 +123,27 @@ func main() {
 	}
 
 	for _, user := range users {
+		scraper := twitterscraper.New()
 		var twitter utils.Twitter
 		var tweets []twitterscraper.Tweet
 		maxTweetsNbr := 50
-		profile, err := twitterscraper.GetProfile(user)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		if profile.Avatar != "" {
-			filePath := utils.WriteImage(picPath, profile.Avatar)
-			filePath = "." + pathReg.FindStringSubmatch(filePath)[1]
-			fmt.Print(filePath)
-			profile.Avatar = filePath
-		}
-		twitter.Profile = profile
 		count := 0
-		for tweet := range twitterscraper.GetTweets(context.Background(), user, maxTweetsNbr) {
+		one := utils.DbProfile{}
+		err = collProfile.Find(ctx, bson.M{"username": user}).One(&one)
+		lastTweetTime := one.LastTweetTime
+		curLastTweetTime := lastTweetTime
+		for tweet := range scraper.GetTweets(context.Background(), user, maxTweetsNbr) {
+			if lastTweetTime >= tweet.Tweet.Timestamp {
+				break
+			}
+			if count == 0 {
+				curLastTweetTime = tweet.Tweet.Timestamp
+			}
 			if tweet.Tweet.Photos != nil && len(tweet.Tweet.Photos) > 0 {
 				var photos []string
 				for _, src := range tweet.Tweet.Photos {
-					filePath := utils.WriteImage(picPath, src)
-					filePath = "." + pathReg.FindStringSubmatch(filePath)[1]
-					fmt.Print(filePath)
-					photos = append(photos, filePath)
+					htmlSrc := imageProcess(collImage, cfg.PicBed, picDir, user, src)
+					photos = append(photos, htmlSrc)
 				}
 				tweet.Tweet.Photos = photos
 			}
@@ -62,21 +153,82 @@ func main() {
 			tweets = append(tweets, tweet.Tweet)
 			count++
 		}
-		twitter.Tweets = tweets
+		lastTweetTime = curLastTweetTime
+		// twitter.Tweets = tweets
+		if count > 0 {
+			collTweet.InsertMany(ctx, tweets)
+		}
 		// fmt.Println(twitter)
+		profile, err := scraper.GetProfile(user)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		if profile.Avatar != "" {
+			profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar)
+		}
+		dbProfile := utils.DbProfile{Username: user, Profile: profile, LastTweetTime: lastTweetTime, LastUpdateTime: time.Now().Unix()}
+		twitter.DbProfile = dbProfile
+
+		cnt, err := collProfile.Find(ctx, bson.M{"username": profile.Username}).Count()
+		if cnt > 0 {
+			update := bson.D{
+				{Key: "$set", Value: bson.D{
+					{Key: "profile", Value: dbProfile.Profile},
+					{Key: "lasttweettime", Value: dbProfile.LastTweetTime},
+					{Key: "lastupdatetime", Value: dbProfile.LastUpdateTime},
+				}},
+			}
+			e := collProfile.UpdateOne(ctx, bson.M{"username": profile.Username}, update)
+			if e != nil {
+				fmt.Println(e)
+			}
+		} else {
+			collProfile.InsertOne(ctx, dbProfile)
+		}
+
+		// one := DbProfile{}
+		// err = collProfile.Find(ctx, bson.M{"username": user}).One(&one)
+
+		dbTweets := []twitterscraper.Tweet{}
+		collTweet.Find(ctx, bson.M{"username": user}).Sort("-timestamp").Limit(50).All(&dbTweets)
+		twitter.Tweets = dbTweets
 
 		jsonBytes, err := json.Marshal(twitter)
 		if err != nil {
 			fmt.Println(err)
 		}
-		file, er := os.OpenFile(twitterPath+user+".json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+		file, er := os.OpenFile(twitterDir+user+".json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 		defer func() { file.Close() }()
 		if er != nil && os.IsNotExist(er) {
-			file, err = os.Create(twitterPath + user + ".json")
+			file, err = os.Create(twitterDir + user + ".json")
 		}
 		_, err = file.Write(jsonBytes)
 		if err != nil {
 			fmt.Println(err)
+		}
+	}
+	if !cfg.DbInit {
+		s, err := utils.GetFileContent(cfg.SettingsPath)
+		settings := utils.Settings{}
+		err = json.Unmarshal([]byte(s), &settings)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			settings.DbInit = true
+			jsonBytes, err := json.Marshal(settings)
+			if err != nil {
+				fmt.Println(err)
+			}
+			file, er := os.OpenFile(cfg.SettingsPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+			defer func() { file.Close() }()
+			if er != nil && os.IsNotExist(er) {
+				file, err = os.Create(cfg.SettingsPath)
+			}
+			_, err = file.Write(jsonBytes)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 }
