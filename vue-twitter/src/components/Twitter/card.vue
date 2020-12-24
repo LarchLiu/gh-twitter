@@ -111,7 +111,7 @@ export default {
       if (len % 2 && idx === len - 1) {
         return 500
       } else {
-        return (500 - (len > 1 ? 2 : 0))/(len > 2 ? 2 : len)
+        return (500 - (len > 1 ? 2 : 0)) / (len > 2 ? 2 : len)
       }
     }
 
