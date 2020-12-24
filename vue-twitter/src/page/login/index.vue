@@ -6,7 +6,7 @@
             required
             label="用户名"
             v-bind="validateInfos.userName">
-                <a-input v-model:value="form.userName"  :placeholder="namePlacholder" />
+                <a-input v-model="form.userName"  :placeholder="namePlacholder" />
             </a-form-item>
 
             <a-form-item
@@ -14,7 +14,7 @@
             required
             label="密码"
             v-bind="validateInfos.password">
-                <a-input v-model:value="form.password" :placeholder="passWordPlacholder" />
+                <a-input v-model="form.password" :placeholder="passWordPlacholder" />
             </a-form-item>
 
             <a-form-item :wrapper-col="{ span: 14, offset: 4 }"
