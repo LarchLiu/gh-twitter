@@ -24,7 +24,6 @@ jobs:
       - uses: bahmutov/npm-install@v1
         with:
           working-directory: vue-twitter
-          useLockFile: false
 
       - run: npm run build
         working-directory: vue-twitter
