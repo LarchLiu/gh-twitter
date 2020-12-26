@@ -39,7 +39,7 @@
             >
             <img
               v-else
-              :ref="i === 0 && tweet.Photos.length > 1 ? 'first-img' : 'other-img'"
+              :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : 'otherImg'"
               :src="img + '?'"
               :width="checkImgWidth(i, tweet.Photos.length)"
               :class="checkImgClass(i, tweet.Photos.length)"
@@ -134,7 +134,7 @@ export default {
     }
 
     const imgOnload = () => {
-      const e = ctx.$refs['first-img']
+      const e = ctx.$refs.firstImg
       if (e && e.width && e.naturalHeight && e.naturalWidth) {
         imgHeight.value = e.naturalHeight * e.width / e.naturalWidth
       }
