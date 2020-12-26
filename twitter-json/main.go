@@ -133,25 +133,29 @@ func main() {
 		lastTweetTime := one.LastTweetTime
 		curLastTweetTime := lastTweetTime
 		for tweet := range scraper.GetTweets(context.Background(), user, maxTweetsNbr) {
-			if lastTweetTime >= tweet.Tweet.Timestamp {
-				break
-			}
-			if count == 0 {
-				curLastTweetTime = tweet.Tweet.Timestamp
-			}
-			if tweet.Tweet.Photos != nil && len(tweet.Tweet.Photos) > 0 {
-				var photos []string
-				for _, src := range tweet.Tweet.Photos {
-					htmlSrc := imageProcess(collImage, cfg.PicBed, picDir, user, src)
-					photos = append(photos, htmlSrc)
+			if tweet.Error != nil {
+				fmt.Println(tweet.Error)
+			} else {
+				if lastTweetTime >= tweet.Tweet.Timestamp {
+					break
 				}
-				tweet.Tweet.Photos = photos
+				if count == 0 {
+					curLastTweetTime = tweet.Tweet.Timestamp
+				}
+				if tweet.Tweet.Photos != nil && len(tweet.Tweet.Photos) > 0 {
+					var photos []string
+					for _, src := range tweet.Tweet.Photos {
+						htmlSrc := imageProcess(collImage, cfg.PicBed, picDir, user, src)
+						photos = append(photos, htmlSrc)
+					}
+					tweet.Tweet.Photos = photos
+				}
+				if tweet.Tweet.HTML != "" {
+					tweet.Tweet.HTML = imgReg.ReplaceAllString(tweet.Tweet.HTML, "")
+				}
+				tweets = append(tweets, tweet.Tweet)
+				count++
 			}
-			if tweet.Tweet.HTML != "" {
-				tweet.Tweet.HTML = imgReg.ReplaceAllString(tweet.Tweet.HTML, "")
-			}
-			tweets = append(tweets, tweet.Tweet)
-			count++
 		}
 		lastTweetTime = curLastTweetTime
 		// twitter.Tweets = tweets
@@ -162,29 +166,35 @@ func main() {
 		profile, err := scraper.GetProfile(user)
 		if err != nil {
 			fmt.Println(err)
-		}
-
-		if profile.Avatar != "" {
-			profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar)
-		}
-		dbProfile := utils.DbProfile{Username: user, Profile: profile, LastTweetTime: lastTweetTime, LastUpdateTime: time.Now().Unix()}
-		twitter.DbProfile = dbProfile
-
-		cnt, err := collProfile.Find(ctx, bson.M{"username": profile.Username}).Count()
-		if cnt > 0 {
-			update := bson.D{
-				{Key: "$set", Value: bson.D{
-					{Key: "profile", Value: dbProfile.Profile},
-					{Key: "lasttweettime", Value: dbProfile.LastTweetTime},
-					{Key: "lastupdatetime", Value: dbProfile.LastUpdateTime},
-				}},
-			}
-			e := collProfile.UpdateOne(ctx, bson.M{"username": profile.Username}, update)
-			if e != nil {
-				fmt.Println(e)
-			}
+			one.LastTweetTime = lastTweetTime
+			one.LastUpdateTime = time.Now().Unix()
+			twitter.DbProfile = one
 		} else {
-			collProfile.InsertOne(ctx, dbProfile)
+			if profile.Avatar != "" {
+				profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar)
+			}
+			dbProfile := utils.DbProfile{Username: user, Profile: profile, LastTweetTime: lastTweetTime, LastUpdateTime: time.Now().Unix()}
+			twitter.DbProfile = dbProfile
+
+			cnt, err := collProfile.Find(ctx, bson.M{"username": profile.Username}).Count()
+			if err != nil {
+				fmt.Println(err)
+			}
+			if cnt > 0 {
+				update := bson.D{
+					{Key: "$set", Value: bson.D{
+						{Key: "profile", Value: dbProfile.Profile},
+						{Key: "lasttweettime", Value: dbProfile.LastTweetTime},
+						{Key: "lastupdatetime", Value: dbProfile.LastUpdateTime},
+					}},
+				}
+				e := collProfile.UpdateOne(ctx, bson.M{"username": profile.Username}, update)
+				if e != nil {
+					fmt.Println(e)
+				}
+			} else {
+				collProfile.InsertOne(ctx, dbProfile)
+			}
 		}
 
 		// one := DbProfile{}

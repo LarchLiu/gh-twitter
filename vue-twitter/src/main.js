@@ -15,7 +15,7 @@ import {
   Form,
   message
 } from 'ant-design-vue'
-import 'ant-design-vue/dist/antd.css'
+// import 'ant-design-vue/dist/antd.css'
 
 const app = createApp(App)
 
