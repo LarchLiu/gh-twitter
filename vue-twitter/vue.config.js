@@ -52,7 +52,7 @@ module.exports = {
             test: new RegExp('\\.(' + productionGzipExtensions.join('|') + ')$'
             ),
             minRatio: 0.8, // 只有压缩率小于这个值的资源才会被处理
-            deleteOriginalAssets: false // 删除原文件
+            deleteOriginalAssets: true // 删除原文件
           }
         )
       )
