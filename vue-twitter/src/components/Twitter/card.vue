@@ -31,9 +31,19 @@
             :class="checkImgRadiusClass(i, tweet.Photos.length)"
           >
             <img
+              v-if="imgHeight"
               :src="img"
               :width="checkImgWidth(i, tweet.Photos.length)"
-              :class="checkImgMarginClass(i, tweet.Photos.length)"
+              :height="imgHeight"
+              :class="checkImgClass(i, tweet.Photos.length)"
+            >
+            <img
+              v-else
+              :ref="i === 0 && tweet.Photos.length > 1 ? 'first-img' : 'other-img'"
+              :src="img + '?'"
+              :width="checkImgWidth(i, tweet.Photos.length)"
+              :class="checkImgClass(i, tweet.Photos.length)"
+              :onload="imgOnload"
             >
           </a>
         </div>
@@ -43,7 +53,7 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, onMounted, getCurrentInstance, watch } from 'vue'
 import { formatTime } from '@/utils/index.js'
 
 export default {
@@ -56,8 +66,10 @@ export default {
       }
     }
   },
-  setup () {
+  setup (props) {
+    const { ctx } = getCurrentInstance()
     const mouseEnter = ref(false)
+    const imgHeight = ref(0)
 
     const getTime = (timestamp) => {
       return formatTime(timestamp, null)
@@ -95,8 +107,14 @@ export default {
       return className
     }
 
-    const checkImgMarginClass = (idx, len) => {
+    const checkImgClass = (idx, len) => {
       const className = []
+      if (len > 1) {
+        className.push('fit-contain')
+        if (idx === 0) {
+          className.push('first-img')
+        }
+      }
       idx++
       if (idx % 2) {
         className.push('mg-right')
@@ -115,6 +133,13 @@ export default {
       }
     }
 
+    const imgOnload = () => {
+      const e = ctx.$refs['first-img']
+      if (e && e.width && e.naturalHeight && e.naturalWidth) {
+        imgHeight.value = e.naturalHeight * e.width / e.naturalWidth
+      }
+    }
+
     const handleMouseEnter = () => {
       mouseEnter.value = true
     }
@@ -122,14 +147,34 @@ export default {
       mouseEnter.value = false
     }
 
+    onMounted(() => {
+      // ctx.$nextTick(() => {
+      //   if (props.tweet.Photos && props.tweet.Photos.length > 1) {
+      //     const e = document.querySelector('.first-img')
+      //     if (e) {
+      //       e.addEventListener('load', () => {
+      //         imgOnload(e)
+      //       })
+      //     }
+      //   }
+      // })
+    })
+
+    watch(() => props.tweet, () => {
+      // 内容改变图片也改变重新计算图片应该显示的高度
+      imgHeight.value = 0
+    })
+
     return {
       getTime,
       mouseEnter,
       checkImgRadiusClass,
-      checkImgMarginClass,
+      checkImgClass,
       handleMouseEnter,
       handleMouseLeave,
-      checkImgWidth
+      checkImgWidth,
+      imgOnload,
+      imgHeight
     }
   }
 }
@@ -181,6 +226,9 @@ export default {
           }
           .mg-bottom {
             margin-bottom: 2px;
+          }
+          .fit-contain {
+            object-fit: cover;
           }
         }
         .text {

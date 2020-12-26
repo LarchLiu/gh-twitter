@@ -58,9 +58,7 @@ export default {
 
     const getUserList = () => {
       twitterApi.getUsersData().then(res => {
-        console.log(usersList.value)
         usersList.value = res.replace(/\s*/g, '').split(',')
-        console.log(usersList.value)
       }).catch(e => {
         console.log(e)
         usersList.value = []
@@ -71,7 +69,7 @@ export default {
       twitterApi.getTweetsData(user).then(data => {
         usersData.value.push(data)
         usersListSort.value.push(data.Profile.Name)
-        console.log(data)
+        // console.log(data)
       }).catch(err => {
         console.log(err)
       })
