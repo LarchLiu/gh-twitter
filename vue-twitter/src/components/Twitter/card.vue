@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { ref, onMounted, getCurrentInstance, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { formatTime } from '@/utils/index.js'
 
 export default {
@@ -67,9 +67,9 @@ export default {
     }
   },
   setup (props) {
-    const { ctx } = getCurrentInstance()
     const mouseEnter = ref(false)
     const imgHeight = ref(0)
+    const firstImg = ref(null)
 
     const getTime = (timestamp) => {
       return formatTime(timestamp, null)
@@ -134,7 +134,7 @@ export default {
     }
 
     const imgOnload = () => {
-      const e = ctx.$refs.firstImg
+      const e = firstImg.value
       if (e && e.width && e.naturalHeight && e.naturalWidth) {
         imgHeight.value = e.naturalHeight * e.width / e.naturalWidth
       }
@@ -174,7 +174,8 @@ export default {
       handleMouseLeave,
       checkImgWidth,
       imgOnload,
-      imgHeight
+      imgHeight,
+      firstImg
     }
   }
 }
