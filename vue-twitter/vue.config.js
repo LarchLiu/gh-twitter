@@ -2,8 +2,6 @@
 const path = require('path')
 const defaultSettings = require('./src/settings.js')
 const isDev = process.env.NODE_ENV === 'development'
-const CompressionWebpackPlugin = require('compression-webpack-plugin')
-const productionGzipExtensions = ['js', 'css']
 
 function resolve (dir) {
   return path.join(__dirname, dir)
@@ -38,25 +36,10 @@ module.exports = {
       errors: true
     }
   },
-  configureWebpack: config => {
+  configureWebpack: {
     // provide the app's title in webpack's name field, so that
     // it can be accessed in index.html to inject the correct title.
-    config.name = name
-    if (!isDev) {
-      config.plugins.push(
-        new CompressionWebpackPlugin(
-          {
-            filename: '[path][base].gz',
-            algorithm: 'gzip',
-            threshold: 10240, // 只有大小大于该值的资源会被处理 10240
-            test: new RegExp('\\.(' + productionGzipExtensions.join('|') + ')$'
-            ),
-            minRatio: 0.8, // 只有压缩率小于这个值的资源才会被处理
-            deleteOriginalAssets: true // 删除原文件
-          }
-        )
-      )
-    }
+    name: name
   },
   chainWebpack (config) {
     config.plugins.delete('preload') // TODO: need test
