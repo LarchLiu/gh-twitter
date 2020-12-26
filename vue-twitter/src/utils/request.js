@@ -59,8 +59,8 @@ service.interceptors.response.use(
         msg = '所选计算周期有日期遗漏'
       }
       message.error({
-        message: msg || 'Error',
-        duration: 5 * 1000
+        content: msg || 'Error',
+        duration: 5
       })
       // 50008:非法的token; 50012:其他客户端登录了;  50014:Token 过期了;
       // if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
@@ -135,8 +135,8 @@ service.interceptors.response.use(
       }
     }
     message.error({
-      message: error.message,
-      duration: 5 * 1000
+      content: error.message,
+      duration: 5
     })
     return Promise.reject(error)
   }

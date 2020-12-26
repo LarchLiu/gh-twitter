@@ -6,8 +6,6 @@ import {
 } from 'vue-router'
 
 // todo 目前不支持 () => import( /* webpackChunkName: 'Home' */ ) 引入
-import Home from '@/page/home/index.vue'
-import Login from '@/page/login/index.vue'
 const routerHistory = createWebHashHistory(process.env.BASE_URL)
 
 const router = createRouter({
@@ -16,12 +14,12 @@ const router = createRouter({
     {
       path: '/login',
       name: 'Login',
-      component: Login
+      component: () => import('@/page/login/index')
     },
     {
       path: '/',
       name: 'Home',
-      component: Home
+      component: () => import('@/page/home/index')
     }
   ]
 })

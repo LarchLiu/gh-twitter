@@ -12,15 +12,15 @@ import {
   Avatar,
   Button,
   Input,
-  Calendar,
-  Badge,
-  Form
+  Form,
+  message
 } from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 
 const app = createApp(App)
 
 app.config.globalProperties.$axios = axios
+app.config.globalProperties.$message = message
 
 // ui注入
 app
@@ -28,8 +28,6 @@ app
   .use(Button)
   .use(Input)
   .use(Form)
-  .use(Calendar)
-  .use(Badge)
 
 // 插件注入
 app.use(router)
