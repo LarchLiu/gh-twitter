@@ -1,6 +1,9 @@
 'use strict'
 const path = require('path')
 const defaultSettings = require('./src/settings.js')
+const isDev = process.env.NODE_ENV === 'development'
+const CompressionWebpackPlugin = require('compression-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 function resolve (dir) {
   return path.join(__dirname, dir)
@@ -35,14 +38,37 @@ module.exports = {
       errors: true
     }
   },
-  configureWebpack: {
+  configureWebpack: config => {
     // provide the app's title in webpack's name field, so that
     // it can be accessed in index.html to inject the correct title.
-    name: name
+    config.name = name
+    config.plugins.push(
+      new CompressionWebpackPlugin(
+        {
+          filename: info => {
+            return `${info.path}.gz${info.query}`
+          },
+          algorithm: 'gzip',
+          threshold: 10240, // 只有大小大于该值的资源会被处理 10240
+          test: new RegExp('\\.(' + ['js'].join('|') + ')$'
+          ),
+          minRatio: 0.8, // 只有压缩率小于这个值的资源才会被处理
+          deleteOriginalAssets: false // 删除原文件
+        }
+      )
+    )
   },
   chainWebpack (config) {
     config.plugins.delete('preload') // TODO: need test
     config.plugins.delete('prefetch') // TODO: need tests
+
+    if (!isDev) {
+      let miniCssExtractPlugin = new MiniCssExtractPlugin({
+        filename: 'static/[name].[hash:8].css',
+        chunkFilename: 'static/[name].[hash:8].css'
+      })
+      config.plugin('extract-css').use(miniCssExtractPlugin)
+    }
 
     config
       // https://webpack.js.org/configuration/devtool/#development
@@ -94,6 +120,7 @@ module.exports = {
         },
       },
     },
+    extract: false
   },
   productionSourceMap: false
 }
