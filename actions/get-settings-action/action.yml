@@ -11,6 +11,8 @@ outputs:
     description: if use webhook
   DbInit:
     description: if db init
+  PageSize:
+    description: page size of tweets
   SettingsPath:
     description: the path of settings file
 runs:

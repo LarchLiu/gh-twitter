@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"path"
 	"regexp"
@@ -162,10 +163,13 @@ func main() {
 		if count > 0 {
 			collTweet.InsertMany(ctx, tweets)
 		}
-		// fmt.Println(twitter)
+		// get user tweets count
+		tweetsCnt, err := collTweet.Find(ctx, bson.M{"username": user}).Count()
+
 		profile, err := scraper.GetProfile(user)
 		if err != nil {
 			fmt.Println(err)
+			one.TweetsCount = tweetsCnt
 			one.LastTweetTime = lastTweetTime
 			one.LastUpdateTime = time.Now().Unix()
 			twitter.DbProfile = one
@@ -174,6 +178,7 @@ func main() {
 				profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar)
 			}
 			dbProfile := utils.DbProfile{Username: user, Profile: profile, LastTweetTime: lastTweetTime, LastUpdateTime: time.Now().Unix()}
+			dbProfile.TweetsCount = tweetsCnt
 			twitter.DbProfile = dbProfile
 
 			cnt, err := collProfile.Find(ctx, bson.M{"username": profile.Username}).Count()
@@ -184,6 +189,7 @@ func main() {
 				update := bson.D{
 					{Key: "$set", Value: bson.D{
 						{Key: "profile", Value: dbProfile.Profile},
+						{Key: "tweetscount", Value: dbProfile.TweetsCount},
 						{Key: "lasttweettime", Value: dbProfile.LastTweetTime},
 						{Key: "lastupdatetime", Value: dbProfile.LastUpdateTime},
 					}},
@@ -197,25 +203,27 @@ func main() {
 			}
 		}
 
-		// one := DbProfile{}
-		// err = collProfile.Find(ctx, bson.M{"username": user}).One(&one)
+		pages := int64(math.Ceil(float64(tweetsCnt) / float64(cfg.PageSize)))
+		for i := int64(0); i < pages; i++ {
+			skipCnt := int64(cfg.PageSize * i)
+			dbTweets := []twitterscraper.Tweet{}
+			collTweet.Find(ctx, bson.M{"username": user}).Skip(skipCnt).Sort("-timestamp").Limit(cfg.PageSize).All(&dbTweets)
+			twitter.Tweets = dbTweets
 
-		dbTweets := []twitterscraper.Tweet{}
-		collTweet.Find(ctx, bson.M{"username": user}).Sort("-timestamp").Limit(50).All(&dbTweets)
-		twitter.Tweets = dbTweets
-
-		jsonBytes, err := json.Marshal(twitter)
-		if err != nil {
-			fmt.Println(err)
-		}
-		file, er := os.OpenFile(twitterDir+user+".json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
-		defer func() { file.Close() }()
-		if er != nil && os.IsNotExist(er) {
-			file, err = os.Create(twitterDir + user + ".json")
-		}
-		_, err = file.Write(jsonBytes)
-		if err != nil {
-			fmt.Println(err)
+			jsonBytes, err := json.Marshal(twitter)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fileName := fmt.Sprintf("%s%s%s%d%s", twitterDir, user, "-", i+1, ".json")
+			file, er := os.OpenFile(fileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+			defer func() { file.Close() }()
+			if er != nil && os.IsNotExist(er) {
+				file, err = os.Create(fileName)
+			}
+			_, err = file.Write(jsonBytes)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 	if !cfg.DbInit {
