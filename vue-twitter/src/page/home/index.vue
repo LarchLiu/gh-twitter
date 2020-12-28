@@ -42,6 +42,7 @@ export default {
     const usersData = ref([])
     const usersListSort = ref([])
     const currentUser = ref(0)
+    const curPage = ref(1)
 
     const onExit = () => {
       ctx.$router.push({
@@ -65,8 +66,8 @@ export default {
       })
     }
 
-    const getUserTweets = (user) => {
-      twitterApi.getTweetsData(user).then(data => {
+    const getUserTweets = (user, page) => {
+      twitterApi.getTweetsData(user, page).then(data => {
         usersData.value.push(data)
         usersListSort.value.push(data.Profile.Name)
         // console.log(data)
@@ -77,6 +78,7 @@ export default {
 
     const changeUser = (i) => {
       currentUser.value = i
+      curPage.value = 1
     }
 
     onMounted(() => {
@@ -86,12 +88,13 @@ export default {
     watch(usersList, () => {
       usersData.value = []
       for (let i = 0; i < usersList.value.length; i++) {
-        getUserTweets(usersList.value[i])
+        getUserTweets(usersList.value[i], curPage)
       }
     })
 
     return {
       currentUser,
+      curPage,
       usersList,
       usersData,
       usersListSort,

@@ -113,6 +113,7 @@ func main() {
 	dir, _ := os.Getwd()
 	twitterDir := path.Join(dir, "./raw/twitter/") + "/"
 	picDir := twitterDir + "images/"
+	jsonDir := twitterDir + "json/"
 	// pathReg := regexp.MustCompile(`(?s)twitter-json/raw(.*?)$`)
 	imgReg := regexp.MustCompile(`(?s)(\<br\>\<a href=(.*)\>\<img(.*)\<\/a\>)(?s)`)
 	f, err := utils.GetFileContent(twitterDir + "userList.txt")
@@ -203,6 +204,18 @@ func main() {
 			}
 		}
 
+		jsonUserDir := jsonDir + user
+		_, err = os.Stat(jsonUserDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				err = os.MkdirAll(jsonUserDir, os.ModePerm)
+				if err != nil {
+					fmt.Println(err)
+				}
+			} else {
+				fmt.Println(err)
+			}
+		}
 		pages := int64(math.Ceil(float64(tweetsCnt) / float64(cfg.PageSize)))
 		for i := int64(0); i < pages; i++ {
 			skipCnt := int64(cfg.PageSize * i)
@@ -214,7 +227,7 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			fileName := fmt.Sprintf("%s%s%s%d%s", twitterDir, user, "-", i+1, ".json")
+			fileName := fmt.Sprintf("%s%s%d%s", jsonUserDir, "/", i+1, ".json")
 			file, er := os.OpenFile(fileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 			defer func() { file.Close() }()
 			if er != nil && os.IsNotExist(er) {
