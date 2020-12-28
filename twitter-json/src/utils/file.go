@@ -12,6 +12,24 @@ import (
 	"strings"
 )
 
+// CheckDirExist check whether dir exist, if not make it
+func CheckDirExist(name string) (exist bool) {
+	_, err := os.Stat(name)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(name, os.ModePerm)
+			if err != nil {
+				fmt.Println(err)
+				return false
+			}
+		} else {
+			fmt.Println(err)
+			return false
+		}
+	}
+	return true
+}
+
 // GetFileContent get file content from filePath.
 func GetFileContent(filePath string) (string, error) {
 	f, err := os.Open(filePath)
@@ -31,17 +49,10 @@ func GetFileContent(filePath string) (string, error) {
 
 // GetImageInfo get image file path and file name.
 func GetImageInfo(dirPath string, href string) (filePath string, fileName string, err error) {
-	_, err = os.Stat(dirPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(dirPath, os.ModePerm)
-			if err != nil {
-				fmt.Println(err)
-				return "", "", err
-			}
-		} else {
-			return "", "", err
-		}
+	exist := CheckDirExist(dirPath)
+
+	if !exist {
+		return "", "", err
 	}
 	var suffix string
 	var name string

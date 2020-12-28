@@ -3,13 +3,18 @@ package utils
 import twitterscraper "github.com/n0madic/twitter-scraper"
 
 type (
-	// DbProfile type.
-	DbProfile struct {
+	// UserInfo user info type.
+	UserInfo struct {
 		Username       string
-		Profile        twitterscraper.Profile
+		Name           string
 		LastTweetTime  int64
 		LastUpdateTime int64
 		TweetsCount    int64
+	}
+	// DbProfile type.
+	DbProfile struct {
+		UserInfo
+		Profile twitterscraper.Profile
 	}
 	// Twitter type.
 	Twitter struct {
