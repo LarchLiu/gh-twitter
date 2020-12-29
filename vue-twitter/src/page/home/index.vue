@@ -14,16 +14,16 @@
                 :key="i"
                 @click="changeUser(i)"
               >
-                <a :class="i === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
+                <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
               </div>
             </div>
           </aside-box>
         </div>
-        <div v-if="currentUser === 0 && Object.Keys(usersData) > 0" class="tweets">
+        <div v-if="currentUser === usersList[0].Username && Object.Keys(usersData) > 0" class="tweets">
           <twitter
             class="detail"
             :isAll="true"
-            :detail="usersData ? usersData[currentUser] : {}"
+            :detail="usersData[currentUser]"
             :usersObj="usersListObj"
           />
         </div>
