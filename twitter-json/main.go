@@ -57,7 +57,7 @@ func uploadImage(picBed string, coll *qmgo.Collection, user string, path string,
 
 func uploadJSON(picBed string, path string, key string) (url string, err error) {
 	if picBed == "qiniu" {
-		key := fmt.Sprintf("%s/%s/%s/", os.Getenv("QINIU_RESOURCE_PREFIX"), "json", key)
+		key := fmt.Sprintf("%s/%s/%s", os.Getenv("QINIU_RESOURCE_PREFIX"), "json", key)
 		retQiniu, err := model.QiniuUpload(path, key)
 		if err != nil {
 			return "", err
@@ -136,7 +136,7 @@ func jsonTwitterFromDB(coll *qmgo.Collection, picBed string, dir string, selUser
 			if err != nil {
 				fmt.Println(err)
 			}
-			key := fmt.Sprintf("%s/%d/%s", selUser, i+1, ".json")
+			key := fmt.Sprintf("%s/%d%s", selUser, i+1, ".json")
 			uploadJSON(picBed, fileName, key)
 		}
 	}
