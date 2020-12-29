@@ -8,7 +8,7 @@
             :need-fixed="true"
             id-name="header"
           >
-            <div v-if="usersList">
+            <div v-if="usersList && usersList.length > 0">
               <div
                 v-for="(user, i) in usersList"
                 :key="i"
@@ -19,7 +19,7 @@
             </div>
           </aside-box>
         </div>
-        <div v-if="currentUser === usersList[0].Username && Object.Keys(usersData) > 0" class="tweets">
+        <div v-if="usersList && usersList.length > 0 && usersData && currentUser === usersList[0].Username" class="tweets">
           <twitter
             class="detail"
             :isAll="true"
@@ -69,9 +69,11 @@ export default {
 
     const getUserList = () => {
       twitterApi.getUsersData().then(res => {
+        console.log(res)
         usersList.value = res
         usersListObj.value = arrToObj(res, 'Username')
-        currentUser.value = usersList.value[0].Username
+        currentUser.value = res[0].Username
+        console.log(currentUser.value)
       }).catch(e => {
         console.log(e)
         usersList.value = []
