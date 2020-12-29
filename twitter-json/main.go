@@ -93,7 +93,7 @@ func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user stri
 	return htmlSrc
 }
 
-func jsonTwitterFromDB(coll *qmgo.Collection, dir string, count int64, pageSize int64, twitter utils.Twitter) {
+func jsonTwitterFromDB(coll *qmgo.Collection, dir string, user string, count int64, pageSize int64, twitter utils.Twitter) {
 	jsonUserDir := dir
 	exist := utils.CheckDirExist(jsonUserDir)
 	if exist {
@@ -101,7 +101,12 @@ func jsonTwitterFromDB(coll *qmgo.Collection, dir string, count int64, pageSize 
 		for i := int64(0); i < pages; i++ {
 			skipCnt := int64(pageSize * i)
 			dbTweets := []twitterscraper.Tweet{}
-			coll.Find(context.Background(), bson.D{{}}).Skip(skipCnt).Sort("-timestamp").Limit(pageSize).All(&dbTweets)
+			sel := bson.M{}
+			if user != "" {
+				sel = bson.M{"username": user}
+			}
+			coll.Find(context.Background(), sel).Skip(skipCnt).Sort("-timestamp").Limit(pageSize).All(&dbTweets)
+
 			twitter.Tweets = dbTweets
 
 			jsonBytes, err := json.Marshal(twitter)
@@ -225,7 +230,8 @@ func main() {
 				if profile.Avatar != "" {
 					profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar)
 				}
-				userInfo := utils.UserInfo{Username: user, Name: profile.Name, LastTweetTime: lastTweetTime, LastUpdateTime: time.Now().Unix(), TweetsCount: tweetsCnt}
+				userInfo := utils.UserInfo{Avatar: profile.Avatar, Username: user, Name: profile.Name,
+					LastTweetTime: lastTweetTime, LastUpdateTime: time.Now().Unix(), TweetsCount: tweetsCnt}
 				dbProfile := utils.DbProfile{UserInfo: userInfo, Profile: profile}
 				twitter.DbProfile = dbProfile
 				userInfoList = append(userInfoList, userInfo)
@@ -250,8 +256,7 @@ func main() {
 				}
 			}
 
-			jsonUserDir := jsonDir + user
-			jsonTwitterFromDB(collTweet, jsonUserDir, tweetsCnt, cfg.PageSize, twitter)
+			jsonTwitterFromDB(collTweet, jsonDir+user, user, tweetsCnt, cfg.PageSize, twitter)
 		}
 	}
 
@@ -267,8 +272,7 @@ func main() {
 		twitter.DbProfile = utils.DbProfile{UserInfo: userInfo}
 		userInfoList = append([]utils.UserInfo{userInfo}, userInfoList...)
 
-		jsonUserDir := jsonDir + name
-		jsonTwitterFromDB(collTweet, jsonUserDir, count, cfg.PageSize, twitter)
+		jsonTwitterFromDB(collTweet, jsonDir+name, "", count, cfg.PageSize, twitter)
 	}
 
 	jsonBytes, err := json.Marshal(userInfoList)

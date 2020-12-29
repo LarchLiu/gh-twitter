@@ -5,6 +5,7 @@ import twitterscraper "github.com/n0madic/twitter-scraper"
 type (
 	// UserInfo user info type.
 	UserInfo struct {
+		Avatar         string
 		Username       string
 		Name           string
 		LastTweetTime  int64

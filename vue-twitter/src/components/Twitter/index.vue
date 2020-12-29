@@ -2,7 +2,7 @@
   <div class="twitter">
     <fixed-header :id-name="idName">
       <div
-        v-if="Object.keys(detail).length > 0"
+        v-if="Object.keys(detail).length > 0 && !isAll"
         class="header"
       >
         <span style="font-size: 15px; font-weight: 800; border: 0 solid black; margin-right: 20px">{{ detail.Profile.Name }}</span>
@@ -22,7 +22,7 @@
       v-if="Object.keys(detail).length > 0"
       class="content"
     >
-      <div class="profile">
+      <div v-if="!isAll" class="profile">
         <div class="name">
           <div style="font-size: 19px; font-weight: 800; border: 0 solid black;">
             {{ detail.Profile.Name }}
@@ -51,7 +51,8 @@
           v-for="(tweet, i) in detail.Tweets"
           :key="i"
         >
-          <card :tweet="margeDetail(tweet, detail.Profile)" />
+          <card v-if="isAll && usersObj" :tweet="margeDetail(tweet, { Avator: usersObj[tweet.Username].Avator, Name: usersObj[tweet.Username].Name})" />
+          <card v-else :tweet="margeDetail(tweet, detail.Profile)" />
         </div>
       </div>
     </div>
@@ -71,6 +72,16 @@ export default {
       default: 'twitter'
     },
     detail: {
+      type: Object,
+      default () {
+        return {}
+      }
+    },
+    isAll: {
+      type: Boolean,
+      default: false
+    },
+    usersObj: {
       type: Object,
       default () {
         return {}

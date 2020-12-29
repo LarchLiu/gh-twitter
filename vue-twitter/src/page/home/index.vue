@@ -8,18 +8,27 @@
             :need-fixed="true"
             id-name="header"
           >
-            <div v-if="usersListSort">
+            <div v-if="usersList">
               <div
-                v-for="(user, i) in usersListSort"
+                v-for="(user, i) in usersList"
                 :key="i"
                 @click="changeUser(i)"
               >
-                <a :class="i === currentUser ? 'current' : 'normal'">{{ user }}</a>
+                <a :class="i === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
               </div>
             </div>
           </aside-box>
         </div>
+        <div v-if="currentUser === 0 && usersData.length > 0" class="tweets">
+          <twitter
+            class="detail"
+            :isAll="true"
+            :detail="usersData ? usersData[currentUser] : {}"
+            :usersObj="usersListObj"
+          />
+        </div>
         <twitter
+          v-else
           class="detail"
           :detail="usersData ? usersData[currentUser] : {}"
         />
@@ -33,6 +42,7 @@ import twitterApi from '@/api/twitter/index'
 import AsideBox from '@/components/AsideBox/index.vue'
 import Twitter from '@/components/Twitter/index.vue'
 import Octokit from '@/http/github'
+import { arrToObj } from '@/utils/index'
 
 export default {
   components: { AsideBox, Twitter },
@@ -40,7 +50,7 @@ export default {
     const { ctx } = getCurrentInstance()
     const usersList = ref([])
     const usersData = ref([])
-    const usersListSort = ref([])
+    const usersListObj = ref({})
     const currentUser = ref(0)
     const curPage = ref(1)
 
@@ -59,7 +69,8 @@ export default {
 
     const getUserList = () => {
       twitterApi.getUsersData().then(res => {
-        usersList.value = res.replace(/\s*/g, '').split(',')
+        usersList.value = res
+        usersListObj.value = arrToObj(res, 'Username')
       }).catch(e => {
         console.log(e)
         usersList.value = []
@@ -69,7 +80,7 @@ export default {
     const getUserTweets = (user, page) => {
       twitterApi.getTweetsData(user, page).then(data => {
         usersData.value.push(data)
-        usersListSort.value.push(data.Profile.Name)
+        // usersListSort.value.push(data.Profile.Name)
         // console.log(data)
       }).catch(err => {
         console.log(err)
@@ -81,6 +92,10 @@ export default {
       curPage.value = 1
     }
 
+    const margeDetail = (tweet, profile) => {
+      return { Avatar: profile.Avatar, Name: profile.Name, ...tweet }
+    }
+
     onMounted(() => {
       getUserList()
     })
@@ -88,7 +103,7 @@ export default {
     watch(usersList, () => {
       usersData.value = []
       for (let i = 0; i < usersList.value.length; i++) {
-        getUserTweets(usersList.value[i], curPage.value)
+        getUserTweets(usersList.value[i].Username, curPage.value)
       }
     })
 
@@ -97,12 +112,13 @@ export default {
       curPage,
       usersList,
       usersData,
-      usersListSort,
       getUserTweets,
       getUserList,
       changeUser,
       onExit,
-      webhook
+      webhook,
+      margeDetail,
+      usersListObj
     }
   }
 }

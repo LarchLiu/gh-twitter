@@ -348,3 +348,11 @@ export function removeClass (ele, cls) {
     ele.className = ele.className.replace(reg, ' ')
   }
 }
+
+export function arrToObj (arr, att) {
+  const obj = {}
+  for (const item of arr) {
+    obj[item[att].toString()] = item
+  }
+  return obj
+}

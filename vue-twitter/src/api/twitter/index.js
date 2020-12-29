@@ -3,7 +3,7 @@ import API from '@/utils/request-api'
 const baseUrl = './twitter/'
 
 function getUsersData () {
-  return API.getRequest(baseUrl + 'userList.txt')
+  return API.getRequest(baseUrl + 'userList.json')
 }
 
 function getTweetsData (user, page) {
