@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'vue-twitter/**'
+      - "vue-twitter/**"
 
 jobs:
   deploy:
@@ -19,7 +19,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: "12.x"
+
+      - name: Get settings
+        id: settings
+        uses: ./actions/get-settings-action
+        with:
+          settings_path: settings.json
 
       - uses: bahmutov/npm-install@v1
         with:
@@ -27,10 +33,13 @@ jobs:
 
       - run: npm run build
         working-directory: vue-twitter
+        env:
+          PIC_BED: ${{ steps.settings.outputs.PicBed }}
+          QINIU_RESOURCE_PREFIX: ${{ secrets.QINIU_RESOURCE_PREFIX }}
 
       - run: |
           cp -r ${{ github.workspace }}/twitter-json/raw/twitter ${{ github.workspace }}/vue-twitter/dist
-        
+
       - name: deploy
         uses: peaceiris/actions-gh-pages@v3
         with:

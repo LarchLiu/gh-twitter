@@ -32,7 +32,7 @@ func checkImageExist(picBed string, coll *qmgo.Collection, user string, path str
 		}
 		ret.Key = ghPath
 	} else {
-		e, key := model.DbCheckImageExist(coll, fmt.Sprintf("%s/%s/%s", "resource/twitter", user, name))
+		e, key := model.DbCheckImageExist(coll, fmt.Sprintf("%s/%s/%s/%s", os.Getenv("QINIU_RESOURCE_PREFIX"), "images", user, name))
 		exist = e
 		ret.Key = key
 	}
@@ -53,6 +53,18 @@ func uploadImage(picBed string, coll *qmgo.Collection, user string, path string,
 	dbImg := utils.DbImage{Key: key, User: user}
 	model.DbInsertImage(coll, dbImg)
 	return ret, nil
+}
+
+func uploadJSON(picBed string, path string, key string) (url string, err error) {
+	if picBed == "qiniu" {
+		retQiniu, err := model.QiniuUpload(path, key)
+		if err != nil {
+			return "", err
+		}
+		url = retQiniu.URL
+		os.Remove(path)
+	}
+	return url, nil
 }
 
 func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user string, src string) (htmlSrc string) {
@@ -93,7 +105,7 @@ func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user stri
 	return htmlSrc
 }
 
-func jsonTwitterFromDB(coll *qmgo.Collection, dir string, user string, count int64, pageSize int64, twitter utils.Twitter) {
+func jsonTwitterFromDB(coll *qmgo.Collection, picBed string, dir string, user string, count int64, pageSize int64, twitter utils.Twitter) {
 	jsonUserDir := dir
 	exist := utils.CheckDirExist(jsonUserDir)
 	if exist {
@@ -123,6 +135,8 @@ func jsonTwitterFromDB(coll *qmgo.Collection, dir string, user string, count int
 			if err != nil {
 				fmt.Println(err)
 			}
+			key := fmt.Sprintf("%s/%s/%s/%d%s", os.Getenv("QINIU_RESOURCE_PREFIX"), "json", user, i+1, ".json")
+			uploadJSON(picBed, fileName, key)
 		}
 	}
 }
@@ -256,7 +270,7 @@ func main() {
 				}
 			}
 
-			jsonTwitterFromDB(collTweet, jsonDir+user, user, tweetsCnt, cfg.PageSize, twitter)
+			jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir+user, user, tweetsCnt, cfg.PageSize, twitter)
 		}
 	}
 
@@ -272,22 +286,24 @@ func main() {
 		twitter.DbProfile = utils.DbProfile{UserInfo: userInfo}
 		userInfoList = append([]utils.UserInfo{userInfo}, userInfoList...)
 
-		jsonTwitterFromDB(collTweet, jsonDir+name, "", count, cfg.PageSize, twitter)
+		jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir+name, name, count, cfg.PageSize, twitter)
 	}
 
 	jsonBytes, err := json.Marshal(userInfoList)
 	if err != nil {
 		fmt.Println(err)
 	}
-	file, er := os.OpenFile("./raw/twitter/userList.json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	file, er := os.OpenFile("./raw/twitter/json/userList.json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	defer func() { file.Close() }()
 	if er != nil && os.IsNotExist(er) {
-		file, err = os.Create("./raw/twitter/userList.json")
+		file, err = os.Create("./raw/twitter/json/userList.json")
 	}
 	_, err = file.Write(jsonBytes)
 	if err != nil {
 		fmt.Println(err)
 	}
+	key := fmt.Sprintf("%s/%s/%s", os.Getenv("QINIU_RESOURCE_PREFIX"), "json", "userList.json")
+	uploadJSON(cfg.PicBed, "./raw/twitter/json/userList.json", key)
 
 	if !cfg.DbInit {
 		s, err := utils.GetFileContent(cfg.SettingsPath)

@@ -66,6 +66,7 @@ jobs:
           QINIU_BUCKET: ${{ secrets.QINIU_BUCKET }}
           QINIU_DOMAIN: ${{ secrets.QINIU_DOMAIN }}
           QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
+          QINIU_RESOURCE_PREFIX: ${{ secrets.QINIU_RESOURCE_PREFIX }}
 
       - name: Export mongodb
         run: |

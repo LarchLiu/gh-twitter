@@ -41,7 +41,7 @@ import { ref, getCurrentInstance, onMounted, watch } from 'vue'
 import twitterApi from '@/api/twitter/index'
 import AsideBox from '@/components/AsideBox/index.vue'
 import Twitter from '@/components/Twitter/index.vue'
-import Octokit from '@/http/github'
+import Octokit from '@/http/qiniu'
 import { arrToObj } from '@/utils/index'
 
 export default {
@@ -69,11 +69,9 @@ export default {
 
     const getUserList = () => {
       twitterApi.getUsersData().then(res => {
-        console.log(res)
         usersList.value = res
         usersListObj.value = arrToObj(res, 'Username')
         currentUser.value = res[0].Username
-        console.log(currentUser.value)
       }).catch(e => {
         console.log(e)
         usersList.value = []

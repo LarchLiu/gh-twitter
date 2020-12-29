@@ -7,7 +7,7 @@
       >
         <span style="font-size: 15px; font-weight: 800; border: 0 solid black; margin-right: 20px">{{ detail.Profile.Name }}</span>
         <span style="font-weight: 700; color: rgb(15, 20, 25);">
-          {{ detail.Profile.TweetsCount }}
+          {{ detail.TweetsCount }}
         </span>
         <span style="color: rgb(91, 112, 131); margin-right: 20px"> 推文</span>
         <span style="color: rgb(91, 112, 131);">{{ "更新时间: " + getTime(detail.LastUpdateTime) }}</span>
