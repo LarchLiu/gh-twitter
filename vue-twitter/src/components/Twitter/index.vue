@@ -10,12 +10,16 @@
           {{ detail.Profile.TweetsCount }}
         </span>
         <span style="color: rgb(91, 112, 131); margin-right: 20px"> 推文</span>
+        <span style="color: rgb(91, 112, 131); margin-right: 20px;float:right">{{ "最后更新时间: " + getTime(detail.LastUpdateTime) }}</span>
       </div>
       <div
         v-else
         class="header"
       >
         <span style="font-size: 15px; font-weight: 800; border: 0 solid black; margin-right: 20px">推文</span>
+        <span v-if="Object.keys(detail).length > 0 && isAll" style="color: rgb(91, 112, 131); margin-right: 20px;float:right">
+          {{ "最后更新时间: " + getTime(detail.LastUpdateTime) }}
+        </span>
       </div>
     </fixed-header>
     <div
@@ -61,6 +65,7 @@
 
 <script>
 import FixedHeader from '@/components/FixedHeader/index.vue'
+import { parseTime } from '@/utils/index.js'
 import Card from './card.vue'
 
 export default {
@@ -91,6 +96,9 @@ export default {
   methods: {
     margeDetail (tweet, profile) {
       return { Avatar: profile.Avatar, Name: profile.Name, ...tweet }
+    },
+    getTime (unix) {
+      return parseTime(unix)
     }
   }
 }

@@ -19,7 +19,7 @@
             </div>
           </aside-box>
         </div>
-        <div v-if="currentUser === 0 && usersData.length > 0" class="tweets">
+        <div v-if="currentUser === 0 && Object.Keys(usersData) > 0" class="tweets">
           <twitter
             class="detail"
             :isAll="true"
@@ -49,9 +49,9 @@ export default {
   setup () {
     const { ctx } = getCurrentInstance()
     const usersList = ref([])
-    const usersData = ref([])
+    const usersData = ref({})
     const usersListObj = ref({})
-    const currentUser = ref(0)
+    const currentUser = ref('')
     const curPage = ref(1)
 
     const onExit = () => {
@@ -71,6 +71,7 @@ export default {
       twitterApi.getUsersData().then(res => {
         usersList.value = res
         usersListObj.value = arrToObj(res, 'Username')
+        currentUser.value = usersList.value[0].Username
       }).catch(e => {
         console.log(e)
         usersList.value = []
@@ -79,7 +80,7 @@ export default {
 
     const getUserTweets = (user, page) => {
       twitterApi.getTweetsData(user, page).then(data => {
-        usersData.value.push(data)
+        usersData.value[user] = data
         // usersListSort.value.push(data.Profile.Name)
         // console.log(data)
       }).catch(err => {
@@ -88,7 +89,7 @@ export default {
     }
 
     const changeUser = (i) => {
-      currentUser.value = i
+      currentUser.value = usersList.value[i].Username
       curPage.value = 1
     }
 
