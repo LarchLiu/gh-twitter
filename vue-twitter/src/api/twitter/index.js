@@ -5,9 +5,9 @@ const baseUrl = './twitter'
 
 function getUsersData () {
   const jsonPath = '/json/userList.json'
-  if (process.env.PIC_BED === 'qiniu') {
+  if (process.env.VUE_APP_PIC_BED === 'qiniu') {
     return new Promise((resolve, reject) => {
-      QiniuOctokit.request('GET /' + process.env.QINIU_RESOURCE_PREFIX + jsonPath).then(response => {
+      QiniuOctokit.request('GET /' + process.env.VUE_APP_QINIU_RESOURCE_PREFIX + jsonPath).then(response => {
         const { data } = response
         resolve(data)
       }).catch(_ => {
@@ -21,9 +21,9 @@ function getUsersData () {
 
 function getTweetsData (user, page) {
   const jsonPath = '/json/' + user + '/' + page + '.json'
-  if (process.env.PIC_BED === 'qiniu') {
+  if (process.env.VUE_APP_PIC_BED === 'qiniu') {
     return new Promise((resolve, reject) => {
-      QiniuOctokit.request('GET /' + process.env.QINIU_RESOURCE_PREFIX + jsonPath).then(response => {
+      QiniuOctokit.request('GET /' + process.env.VUE_APP_QINIU_RESOURCE_PREFIX + jsonPath).then(response => {
         const { data } = response
         resolve(data)
       }).catch(_ => {
