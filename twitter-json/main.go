@@ -23,7 +23,11 @@ func checkImageExist(picBed string, coll *qmgo.Collection, user string, path str
 	pathReg := regexp.MustCompile(`(?s)twitter-json/raw(.*?)$`)
 	ghPath = "." + pathReg.FindStringSubmatch(path)[1]
 	ret = utils.DbImage{User: user}
-	if picBed == "github" {
+	if picBed == "qiniu" {
+		e, key := model.DbCheckImageExist(coll, fmt.Sprintf("%s/%s/%s/%s", os.Getenv("QINIU_RESOURCE_PREFIX"), "images", user, name))
+		exist = e
+		ret.Key = key
+	} else {
 		_, err := os.Stat(path)
 		if err == nil {
 			exist = true
@@ -31,10 +35,6 @@ func checkImageExist(picBed string, coll *qmgo.Collection, user string, path str
 			exist = false
 		}
 		ret.Key = ghPath
-	} else {
-		e, key := model.DbCheckImageExist(coll, fmt.Sprintf("%s/%s/%s/%s", os.Getenv("QINIU_RESOURCE_PREFIX"), "images", user, name))
-		exist = e
-		ret.Key = key
 	}
 
 	return exist, ret, ghPath
@@ -57,6 +57,7 @@ func uploadImage(picBed string, coll *qmgo.Collection, user string, path string,
 
 func uploadJSON(picBed string, path string, key string) (url string, err error) {
 	if picBed == "qiniu" {
+		key := fmt.Sprintf("%s/%s/%s/", os.Getenv("QINIU_RESOURCE_PREFIX"), "json", key)
 		retQiniu, err := model.QiniuUpload(path, key)
 		if err != nil {
 			return "", err
@@ -105,8 +106,8 @@ func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user stri
 	return htmlSrc
 }
 
-func jsonTwitterFromDB(coll *qmgo.Collection, picBed string, dir string, user string, count int64, pageSize int64, twitter utils.Twitter) {
-	jsonUserDir := dir
+func jsonTwitterFromDB(coll *qmgo.Collection, picBed string, dir string, selUser string, count int64, pageSize int64, twitter utils.Twitter) {
+	jsonUserDir := dir + selUser
 	exist := utils.CheckDirExist(jsonUserDir)
 	if exist {
 		pages := int64(math.Ceil(float64(count) / float64(pageSize)))
@@ -114,8 +115,8 @@ func jsonTwitterFromDB(coll *qmgo.Collection, picBed string, dir string, user st
 			skipCnt := int64(pageSize * i)
 			dbTweets := []twitterscraper.Tweet{}
 			sel := bson.M{}
-			if user != "" {
-				sel = bson.M{"username": user}
+			if selUser != "@all" {
+				sel = bson.M{"username": selUser}
 			}
 			coll.Find(context.Background(), sel).Skip(skipCnt).Sort("-timestamp").Limit(pageSize).All(&dbTweets)
 
@@ -135,7 +136,7 @@ func jsonTwitterFromDB(coll *qmgo.Collection, picBed string, dir string, user st
 			if err != nil {
 				fmt.Println(err)
 			}
-			key := fmt.Sprintf("%s/%s/%s/%d%s", os.Getenv("QINIU_RESOURCE_PREFIX"), "json", user, i+1, ".json")
+			key := fmt.Sprintf("%s/%d/%s", selUser, i+1, ".json")
 			uploadJSON(picBed, fileName, key)
 		}
 	}
@@ -270,7 +271,7 @@ func main() {
 				}
 			}
 
-			jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir+user, user, tweetsCnt, cfg.PageSize, twitter)
+			jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir, user, tweetsCnt, cfg.PageSize, twitter)
 		}
 	}
 
@@ -286,24 +287,25 @@ func main() {
 		twitter.DbProfile = utils.DbProfile{UserInfo: userInfo}
 		userInfoList = append([]utils.UserInfo{userInfo}, userInfoList...)
 
-		jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir+name, name, count, cfg.PageSize, twitter)
+		jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir, name, count, cfg.PageSize, twitter)
 	}
 
+	userListPath := jsonDir + "userList.json"
 	jsonBytes, err := json.Marshal(userInfoList)
 	if err != nil {
 		fmt.Println(err)
 	}
-	file, er := os.OpenFile("./raw/twitter/json/userList.json", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	file, er := os.OpenFile(userListPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	defer func() { file.Close() }()
 	if er != nil && os.IsNotExist(er) {
-		file, err = os.Create("./raw/twitter/json/userList.json")
+		file, err = os.Create(userListPath)
 	}
 	_, err = file.Write(jsonBytes)
 	if err != nil {
 		fmt.Println(err)
 	}
-	key := fmt.Sprintf("%s/%s/%s", os.Getenv("QINIU_RESOURCE_PREFIX"), "json", "userList.json")
-	uploadJSON(cfg.PicBed, "./raw/twitter/json/userList.json", key)
+	key := "userList.json"
+	uploadJSON(cfg.PicBed, userListPath, key)
 
 	if !cfg.DbInit {
 		s, err := utils.GetFileContent(cfg.SettingsPath)
