@@ -55,7 +55,7 @@
           v-for="(tweet, i) in detail.Tweets"
           :key="i"
         >
-          <card v-if="isAll && usersObj" :tweet="margeDetail(tweet, { Avator: usersObj[tweet.Username].Avator, Name: usersObj[tweet.Username].Name})" />
+          <card v-if="isAll && usersObj" :tweet="margeDetail(tweet, { Avatar: usersObj[tweet.Username].Avatar, Name: usersObj[tweet.Username].Name})" />
           <card v-else :tweet="margeDetail(tweet, detail.Profile)" />
         </div>
       </div>
