@@ -2,23 +2,6 @@
   <div class="container">
     <div class="w1210">
       <div class="bd">
-        <div class="aside-wrap">
-          <aside-box
-            title="GH Twitter"
-            :need-fixed="true"
-            id-name="header"
-          >
-            <div v-if="usersList && usersList.length > 0">
-              <div
-                v-for="(user, i) in usersList"
-                :key="i"
-                @click="changeUser(i)"
-              >
-                <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
-              </div>
-            </div>
-          </aside-box>
-        </div>
         <div v-if="usersList && usersList.length > 0 && usersData && Object.keys(usersData).length === usersList.length" class="tweets">
           <twitter
             v-if="currentUser === usersList[0].Username"
@@ -40,13 +23,13 @@
 <script>
 import { ref, getCurrentInstance, onMounted, watch } from 'vue'
 import twitterApi from '@/api/twitter/index'
-import AsideBox from '@/components/AsideBox/index.vue'
+// import AsideBox from '@/components/AsideBox/index.vue'
 import Twitter from '@/components/Twitter/index.vue'
 import Octokit from '@/http/qiniu'
 import { arrToObj } from '@/utils/index'
 
 export default {
-  components: { AsideBox, Twitter },
+  components: { Twitter },
   setup () {
     const { ctx } = getCurrentInstance()
     const usersList = ref([])
