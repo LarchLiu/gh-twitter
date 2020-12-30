@@ -4,8 +4,9 @@ import QiniuOctokit from '@/http/qiniu'
 const baseUrl = './twitter'
 
 function getUsersData () {
-  const jsonPath = '/json/userList.json'
+  let jsonPath = '/json/userList.json'
   if (process.env.VUE_APP_PIC_BED === 'qiniu') {
+    jsonPath += '?v=' + (new Date()).getTime()
     return new Promise((resolve, reject) => {
       QiniuOctokit.request('GET /' + process.env.VUE_APP_QINIU_RESOURCE_PREFIX + jsonPath).then(response => {
         const { data } = response
@@ -20,8 +21,9 @@ function getUsersData () {
 }
 
 function getTweetsData (user, page) {
-  const jsonPath = '/json/' + user + '/' + page + '.json'
+  let jsonPath = '/json/' + user + '/' + page + '.json'
   if (process.env.VUE_APP_PIC_BED === 'qiniu') {
+    jsonPath += '?v=' + (new Date()).getTime()
     return new Promise((resolve, reject) => {
       QiniuOctokit.request('GET /' + process.env.VUE_APP_QINIU_RESOURCE_PREFIX + jsonPath).then(response => {
         const { data } = response

@@ -28,7 +28,8 @@ var jsonPrefix string = os.Getenv("QINIU_RESOURCE_PREFIX") + "/json/"
 func QiniuUpload(filePath string, key string) (ret QiniuRet, err error) {
 	mac := qbox.NewMac(accessKey, secretKey)
 	putPolicy := storage.PutPolicy{
-		Scope:      bucket,
+		Scope:      fmt.Sprintf("%s:%s", bucket, key),
+		InsertOnly: 0,
 		ReturnBody: `{"key": $(key), "hash": $(etag), "type": $(mimeType)}`,
 	}
 	upToken := putPolicy.UploadToken(mac)

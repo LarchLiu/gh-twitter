@@ -149,11 +149,6 @@ func main() {
 	}
 	fmt.Printf("%+v\n", cfg)
 
-	if cfg.PicBed == "qiniu" {
-		// 先删除再更新
-		model.QiniuRemoveJSONFile()
-	}
-
 	ctx := context.Background()
 	cli := model.DbInit()
 	collProfile := model.DbColl(cli, "profile")
