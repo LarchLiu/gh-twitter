@@ -19,7 +19,7 @@
             </div>
           </aside-box>
         </div>
-        <div v-if="usersList && usersList.length > 0 && usersData && currentUser === usersList[0].Username" class="tweets">
+        <div v-if="usersList && usersList.length > 0 && usersData && Object.Keys(usersData).length > 0 && currentUser === usersList[0].Username" class="tweets">
           <twitter
             class="detail"
             :isAll="true"
@@ -30,7 +30,7 @@
         <twitter
           v-else
           class="detail"
-          :detail="usersData ? usersData[currentUser] : {}"
+          :detail="usersData && Object.Keys(usersData).length > 0 ? usersData[currentUser] : {}"
         />
       </div>
     </div>
