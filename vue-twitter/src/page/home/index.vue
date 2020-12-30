@@ -103,7 +103,7 @@ export default {
     })
 
     watch(usersList, () => {
-      usersData.value = []
+      usersData.value = {}
       for (let i = 0; i < usersList.value.length; i++) {
         getUserTweets(usersList.value[i].Username, curPage.value)
       }
