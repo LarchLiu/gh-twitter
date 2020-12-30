@@ -2,6 +2,17 @@
   <div class="container">
     <div class="w1210">
       <div class="bd">
+        <div class="aside-wrap">
+          <div v-if="usersList && usersList.length > 0">
+              <div
+                v-for="(user, i) in usersList"
+                :key="i"
+                @click="changeUser(i)"
+              >
+                <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
+              </div>
+            </div>
+        </div>
         <div v-if="usersList && usersList.length > 0 && usersData && Object.keys(usersData).length === usersList.length" class="tweets">
           <twitter
             v-if="currentUser === usersList[0].Username"
