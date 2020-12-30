@@ -19,19 +19,20 @@
             </div>
           </aside-box>
         </div>
-        <div v-if="usersList && usersList.length > 0 && usersData && Object.Keys(usersData).length > 0 && currentUser === usersList[0].Username" class="tweets">
+        <div v-if="usersList && usersList.length > 0 && usersData && Object.keys(usersData).length === usersList.length" class="tweets">
           <twitter
+            v-if="currentUser === usersList[0].Username"
             class="detail"
             :isAll="true"
             :detail="usersData[currentUser]"
             :usersObj="usersListObj"
           />
+          <twitter
+            v-else
+            class="detail"
+            :detail="usersData[currentUser]"
+          />
         </div>
-        <twitter
-          v-else
-          class="detail"
-          :detail="usersData && Object.Keys(usersData).length > 0 ? usersData[currentUser] : {}"
-        />
       </div>
     </div>
   </div>
