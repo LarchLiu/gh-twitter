@@ -8,8 +8,8 @@
             :need-fixed="true"
             id-name="header"
           >
-            <template #default='{ usersList }'>
-              <div v-if="usersList && usersList.length > 0">
+            <template v-slot>
+              <div v-if="usersList.length > 0">
                 <div
                   v-for="(user, i) in usersList"
                   :key="i"
@@ -18,10 +18,12 @@
                   <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
                 </div>
               </div>
+              <div v-else>
+              </div>
             </template>
           </aside-box>
         </div>
-        <div v-if="usersList && usersList.length > 0 && usersData && Object.keys(usersData).length === usersList.length" class="tweets">
+        <div v-if="usersList.length > 0 && Object.keys(usersData).length === usersList.length" class="tweets">
           <twitter
             v-if="currentUser === usersList[0].Username"
             class="detail"
@@ -35,6 +37,10 @@
             :detail="usersData[currentUser]"
           />
         </div>
+        <twitter
+            v-else
+            class="detail"
+          />
       </div>
     </div>
   </div>
