@@ -8,7 +8,7 @@
             :need-fixed="true"
             id-name="header"
           >
-            <template #default='usersList'>
+            <template #default='{ usersList }'>
               <div v-if="usersList && usersList.length > 0">
                 <div
                   v-for="(user, i) in usersList"
