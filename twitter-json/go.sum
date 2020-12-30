@@ -87,6 +87,8 @@ github.com/qiniu/api.v7/v7 v7.8.0 h1:Ye9sHXwCpeDgKJ4BNSoDvXe4yEuU8a/HTT1jKRgkqe8
 github.com/qiniu/api.v7/v7 v7.8.0/go.mod h1:J7pD9UsnxO7XxyRLUHpsWEQd/HgWJNwnn/Za9qEPdEA=
 github.com/qiniu/qmgo v0.9.1 h1:qJaSAvkXekJPsAzB7tztCiMPMkmIYM/5FjYqtAfrs2I=
 github.com/qiniu/qmgo v0.9.1/go.mod h1:kpR2EI9/fZw609zL4rS47bQWlg80VrwPpmtniNkQmZY=
+github.com/qiniu/x v1.11.5 h1:TYr5cl4g2yoHAZeDK4MTjKF6CMoG+IHlCDvvM5qym6U=
+github.com/qiniu/x v1.11.5/go.mod h1:03Ni9tj+N2h2aKnAz+6N0Xfl8FwMEDRC2PAlxekASDs=
 github.com/rogpeppe/go-internal v1.1.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.2.2/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=

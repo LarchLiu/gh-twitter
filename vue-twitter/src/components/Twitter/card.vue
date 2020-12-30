@@ -40,7 +40,7 @@
             <img
               v-else
               :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : 'otherImg'"
-              :src="img + '?'"
+              :src="img"
               :width="checkImgWidth(i, tweet.Photos.length)"
               :class="checkImgClass(i, tweet.Photos.length)"
               :onload="imgOnload"
