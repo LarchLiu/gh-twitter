@@ -8,15 +8,17 @@
             :need-fixed="true"
             id-name="header"
           >
-            <div v-if="usersList && usersList.length > 0">
-              <div
-                v-for="(user, i) in usersList"
-                :key="i"
-                @click="changeUser(i)"
-              >
-                <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
+            <template #default='usersList'>
+              <div v-if="usersList && usersList.length > 0">
+                <div
+                  v-for="(user, i) in usersList"
+                  :key="i"
+                  @click="changeUser(i)"
+                >
+                  <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
+                </div>
               </div>
-            </div>
+            </template>
           </aside-box>
         </div>
         <div v-if="usersList && usersList.length > 0 && usersData && Object.keys(usersData).length === usersList.length" class="tweets">
