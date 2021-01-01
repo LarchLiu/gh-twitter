@@ -9976,7 +9976,7 @@ async function main() {
     if (cancelOthers) {
         await cancelOutdatedRuns(context);
     }
-    const cancelPrevious = getBooleanInput('cancel_previous', false);
+    const cancelPrevious = getBooleanInput('cancel_previous', true);
     if (cancelPrevious) {
         await cancelPreviousRuns(context);
     }
@@ -10018,12 +10018,12 @@ async function cancelOutdatedRuns(context) {
     }
 }
 async function cancelPreviousRuns(context) {
+    const currentRun = context.currentRun;
     const cancelVictims = context.olderRuns.filter((run) => {
-        core.info(run.status);
         if (run.status === 'completed') {
             return false;
         }
-        return true;
+        return run.branch === currentRun.branch;
     });
     if (!cancelVictims.length) {
         return core.info(`Did not find previous workflow-runs to be cancelled`);
