@@ -323,6 +323,7 @@ func main() {
 			userInfoList = append([]utils.UserInfo{userInfo}, userInfoList...)
 
 			jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir, name, count, cfg.PageSize, twitter)
+			updateUsers = append([]string{name}, updateUsers...)
 		}
 
 		fileName := "userList.json"
