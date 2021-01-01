@@ -8,7 +8,10 @@
             :need-fixed="true"
             id-name="header"
           >
-            <template v-slot v-if="usersList.length > 0">
+            <template v-slot:btn v-if="needUpdate">
+              <a-button :disabled="triggerUpdate" @click="triggerUpdate = true">refresh</a-button>
+            </template>
+            <template v-slot:default v-if="usersList.length > 0">
               <div
                 v-for="(user, i) in usersList"
                 :key="i"
@@ -42,7 +45,7 @@
   </div>
 </template>
 <script>
-import { ref, getCurrentInstance, onMounted, watch } from 'vue'
+import { ref, getCurrentInstance, onMounted, onUnmounted, watch } from 'vue'
 import twitterApi from '@/api/twitter/index'
 import AsideBox from '@/components/AsideBox/index.vue'
 import Twitter from '@/components/Twitter/index.vue'
@@ -53,11 +56,16 @@ export default {
   components: { AsideBox, Twitter },
   setup () {
     const { ctx } = getCurrentInstance()
+    const updateUser = ref([])
     const usersList = ref([])
     const usersData = ref({})
     const usersListObj = ref({})
     const currentUser = ref('')
     const curPage = ref(1)
+    const updateTime = ref(0)
+    const needUpdate = ref(false)
+    const triggerUpdate = ref(false)
+    var timer
 
     const onExit = () => {
       ctx.$router.push({
@@ -72,11 +80,48 @@ export default {
       console.log(process.env.VUE_APP_GITHUB_TOKEN)
     }
 
+    const dataInit = () => {
+      twitterApi.getUsersData().then(res => {
+        updateUser.value = res.map(item => {
+          return item.Username
+        })
+        usersList.value = res
+        usersListObj.value = arrToObj(res, 'Username')
+        currentUser.value = res[0].Username
+        twitterApi.getUpdateInfo().then(info => {
+          updateTime.value = info.UpdateTime
+        }).catch(e => {
+          console.log(e)
+        })
+        for (let i = 0; i < updateUser.value.length; i++) {
+          getUserTweets(updateUser.value[i], 1)
+        }
+      }).catch(e => {
+        console.log(e)
+        usersList.value = []
+      })
+    }
+
+    const getUpdateInfo = () => {
+      twitterApi.getUpdateInfo().then(res => {
+        if (updateTime.value < res.UpdateTime) {
+          updateTime.value = res.UpdateTime
+          if (res.IsUpdate) {
+            needUpdate.value = res.IsUpdate
+            updateUser.value = res.Users
+          }
+        }
+      }).catch(e => {
+        console.log(e)
+        usersList.value = []
+      })
+    }
+
     const getUserList = () => {
       twitterApi.getUsersData().then(res => {
         usersList.value = res
         usersListObj.value = arrToObj(res, 'Username')
-        currentUser.value = res[0].Username
+        // currentUser.value = res[0].Username
       }).catch(e => {
         console.log(e)
         usersList.value = []
@@ -86,6 +131,11 @@ export default {
     const getUserTweets = (user, page) => {
       twitterApi.getTweetsData(user, page).then(data => {
         usersData.value[user] = data
+        updateUser.value.splice(updateUser.value.findIndex(e => e === user), 1)
+        if (updateUser.value.length === 0) {
+          needUpdate.value = false
+          triggerUpdate.value = false
+        }
         // usersListSort.value.push(data.Profile.Name)
         // console.log(data)
       }).catch(err => {
@@ -103,13 +153,31 @@ export default {
     }
 
     onMounted(() => {
-      getUserList()
+      dataInit()
+      timer = window.setInterval(() => {
+        setTimeout(() => {
+          getUpdateInfo()
+        }, 0)
+      }, 60000)
     })
 
-    watch(usersList, () => {
-      usersData.value = {}
-      for (let i = 0; i < usersList.value.length; i++) {
-        getUserTweets(usersList.value[i].Username, curPage.value)
+    onUnmounted(() => {
+      window.clearInterval(timer)
+    })
+
+    // watch(usersList, () => {
+    //   usersData.value = {}
+    //   for (let i = 0; i < usersList.value.length; i++) {
+    //     getUserTweets(usersList.value[i].Username, curPage.value)
+    //   }
+    // })
+
+    watch([needUpdate, triggerUpdate], () => {
+      if (needUpdate.value && triggerUpdate.value) {
+        getUserList()
+        for (let i = 0; i < updateUser.value.length; i++) {
+          getUserTweets(updateUser.value[i], 1)
+        }
       }
     })
 
@@ -120,11 +188,16 @@ export default {
       usersData,
       getUserTweets,
       getUserList,
+      getUpdateInfo,
       changeUser,
       onExit,
       webhook,
       margeDetail,
-      usersListObj
+      usersListObj,
+      updateUser,
+      needUpdate,
+      triggerUpdate,
+      updateTime
     }
   }
 }

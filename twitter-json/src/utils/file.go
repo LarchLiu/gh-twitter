@@ -136,3 +136,16 @@ func getCorrectHref(href string, url string) (correctHref string, exist bool) {
 	}
 	return "", false
 }
+
+// WriteJSONFile wtrie json to file
+func WriteJSONFile(fileName string, jsonBytes []byte) {
+	file, er := os.OpenFile(fileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	defer func() { file.Close() }()
+	if er != nil {
+		fmt.Println(er)
+	}
+	_, err := file.Write(jsonBytes)
+	if err != nil {
+		fmt.Println(err)
+	}
+}

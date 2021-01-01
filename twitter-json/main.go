@@ -186,8 +186,10 @@ func main() {
 		}
 	}
 
+	scraper := twitterscraper.New()
+	isUpdate := false
+	updateUsers := []string{}
 	for _, user := range users {
-		scraper := twitterscraper.New()
 		var twitter utils.Twitter
 		var tweets []twitterscraper.Tweet
 		maxTweetsNbr := 50
@@ -225,87 +227,124 @@ func main() {
 					count++
 				}
 			}
-			lastTweetTime = curLastTweetTime
-			// twitter.Tweets = tweets
+
 			if count > 0 {
+				isUpdate = true
+				updateUsers = append(updateUsers, user)
+				lastTweetTime = curLastTweetTime
+
 				collTweet.InsertMany(ctx, tweets)
-			}
-			// get user tweets count
-			tweetsCnt, err := collTweet.Find(ctx, bson.M{"username": user}).Count()
 
-			profile, err := scraper.GetProfile(user)
-			if err != nil {
-				fmt.Println(err)
-				one.TweetsCount = tweetsCnt
-				one.LastTweetTime = lastTweetTime
-				one.LastUpdateTime = time.Now().Unix()
-				twitter.DbProfile = one
-				userInfoList = append(userInfoList, one.UserInfo)
-			} else {
-				if profile.Avatar != "" {
-					profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar)
-				}
-				userInfo := utils.UserInfo{Avatar: profile.Avatar, Username: user, Name: profile.Name,
-					LastTweetTime: lastTweetTime, LastUpdateTime: time.Now().Unix(), TweetsCount: tweetsCnt}
-				dbProfile := utils.DbProfile{UserInfo: userInfo, Profile: profile}
-				twitter.DbProfile = dbProfile
-				userInfoList = append(userInfoList, userInfo)
+				// get user tweets count
+				tweetsCnt, err := collTweet.Find(ctx, bson.M{"username": user}).Count()
+				pages := int(math.Ceil(float64(tweetsCnt) / float64(cfg.PageSize)))
 
-				cnt, err := collProfile.Find(ctx, bson.M{"userinfo.username": profile.Username}).Count()
+				profile, err := scraper.GetProfile(user)
 				if err != nil {
 					fmt.Println(err)
-				}
-				if cnt > 0 {
-					update := bson.D{
-						{Key: "$set", Value: bson.D{
-							{Key: "profile", Value: dbProfile.Profile},
-							{Key: "userinfo", Value: dbProfile.UserInfo},
-						}},
-					}
-					e := collProfile.UpdateOne(ctx, bson.M{"userinfo.username": profile.Username}, update)
-					if e != nil {
-						fmt.Println(e)
+					one.Username = user
+					one.TweetsCount = tweetsCnt
+					one.LastTweetTime = lastTweetTime
+					one.LastUpdateTime = time.Now().Unix()
+					one.Pages = pages
+					twitter.DbProfile = one
+					userInfoList = append(userInfoList, one.UserInfo)
+					if !cfg.DbInit {
+						collProfile.InsertOne(ctx, utils.DbProfile{UserInfo: one.UserInfo})
 					}
 				} else {
-					collProfile.InsertOne(ctx, dbProfile)
+					if profile.Avatar != "" {
+						profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar)
+					}
+					userInfo := utils.UserInfo{Avatar: profile.Avatar, Username: user, Name: profile.Name,
+						LastTweetTime: lastTweetTime, LastUpdateTime: time.Now().Unix(), TweetsCount: tweetsCnt, Pages: pages}
+					dbProfile := utils.DbProfile{UserInfo: userInfo, Profile: profile}
+					twitter.DbProfile = dbProfile
+					userInfoList = append(userInfoList, userInfo)
+
+					cnt, err := collProfile.Find(ctx, bson.M{"userinfo.username": profile.Username}).Count()
+					if err != nil {
+						fmt.Println(err)
+					}
+					if cnt > 0 {
+						update := bson.D{
+							{Key: "$set", Value: bson.D{
+								{Key: "profile", Value: dbProfile.Profile},
+								{Key: "userinfo", Value: dbProfile.UserInfo},
+							}},
+						}
+						e := collProfile.UpdateOne(ctx, bson.M{"userinfo.username": profile.Username}, update)
+						if e != nil {
+							fmt.Println(e)
+						}
+					} else {
+						collProfile.InsertOne(ctx, dbProfile)
+					}
+				}
+
+				jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir, user, tweetsCnt, cfg.PageSize, twitter)
+			} else {
+				err := collProfile.Find(ctx, bson.M{"userinfo.username": user}).One(&one)
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					tweetsCnt, err := collTweet.Find(ctx, bson.M{"username": user}).Count()
+					if err != nil {
+						tweetsCnt = 0
+					}
+					pages := int(math.Ceil(float64(tweetsCnt) / float64(cfg.PageSize)))
+
+					one.Username = user
+					one.TweetsCount = tweetsCnt
+					one.LastTweetTime = lastTweetTime
+					one.LastUpdateTime = time.Now().Unix()
+					one.Pages = pages
+					userInfoList = append(userInfoList, one.UserInfo)
+					if !cfg.DbInit {
+						collProfile.InsertOne(ctx, utils.DbProfile{UserInfo: one.UserInfo})
+					}
 				}
 			}
-
-			jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir, user, tweetsCnt, cfg.PageSize, twitter)
 		}
 	}
 
-	name := "@all"
-	twitter := utils.Twitter{}
-	count, err := collTweet.Find(ctx, bson.M{}).Count()
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		one := twitterscraper.Tweet{}
-		err = collTweet.Find(ctx, bson.M{}).Sort("-timestamp").Limit(1).One(&one)
-		userInfo := utils.UserInfo{Username: name, Name: "All", LastTweetTime: one.Timestamp, LastUpdateTime: time.Now().Unix(), TweetsCount: count}
-		twitter.DbProfile = utils.DbProfile{UserInfo: userInfo}
-		userInfoList = append([]utils.UserInfo{userInfo}, userInfoList...)
+	if isUpdate {
+		name := "@all"
+		twitter := utils.Twitter{}
+		count, err := collTweet.Find(ctx, bson.M{}).Count()
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			pages := int(math.Ceil(float64(count) / float64(cfg.PageSize)))
+			one := twitterscraper.Tweet{}
+			err = collTweet.Find(ctx, bson.M{}).Sort("-timestamp").Limit(1).One(&one)
+			userInfo := utils.UserInfo{Username: name, Name: "All", LastTweetTime: one.Timestamp, LastUpdateTime: time.Now().Unix(), TweetsCount: count, Pages: pages}
+			twitter.DbProfile = utils.DbProfile{UserInfo: userInfo}
+			userInfoList = append([]utils.UserInfo{userInfo}, userInfoList...)
 
-		jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir, name, count, cfg.PageSize, twitter)
+			jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir, name, count, cfg.PageSize, twitter)
+		}
+
+		userListPath := jsonDir + "userList.json"
+		jsonBytes, err := json.Marshal(userInfoList)
+		if err != nil {
+			fmt.Println(err)
+		}
+		utils.WriteJSONFile(userListPath, jsonBytes)
+		key := "userList.json"
+		uploadJSON(cfg.PicBed, userListPath, key)
 	}
 
-	userListPath := jsonDir + "userList.json"
-	jsonBytes, err := json.Marshal(userInfoList)
+	// write and upload json file of updataInfo
+	updateInfo := utils.UpdateInfo{UpdateTime: time.Now().Unix(), IsUpdate: isUpdate, Users: updateUsers}
+	fileName := jsonDir + "updateInfo.json"
+	jsonBytes, err := json.Marshal(updateInfo)
 	if err != nil {
 		fmt.Println(err)
 	}
-	file, er := os.OpenFile(userListPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
-	defer func() { file.Close() }()
-	if er != nil && os.IsNotExist(er) {
-		file, err = os.Create(userListPath)
-	}
-	_, err = file.Write(jsonBytes)
-	if err != nil {
-		fmt.Println(err)
-	}
-	key := "userList.json"
-	uploadJSON(cfg.PicBed, userListPath, key)
+	utils.WriteJSONFile(fileName, jsonBytes)
+	key := "updateInfo.json"
+	uploadJSON(cfg.PicBed, fileName, key)
 
 	if !cfg.DbInit {
 		s, err := utils.GetFileContent(cfg.SettingsPath)
@@ -319,15 +358,7 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			file, er := os.OpenFile(cfg.SettingsPath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
-			defer func() { file.Close() }()
-			if er != nil && os.IsNotExist(er) {
-				file, err = os.Create(cfg.SettingsPath)
-			}
-			_, err = file.Write(jsonBytes)
-			if err != nil {
-				fmt.Println(err)
-			}
+			utils.WriteJSONFile(cfg.SettingsPath, jsonBytes)
 		}
 	}
 }

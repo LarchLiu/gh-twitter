@@ -3,10 +3,12 @@
     <fixed-header v-if="needFixed" :id-name="idName" @change="handleFixedChange">
       <div class="aside-header" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
         <span style="font-size: 15px; font-weight: 800; border: 0 solid black;">{{ title }}</span>
+        <slot name="btn" />
       </div>
     </fixed-header>
     <div v-else class="aside-header">
-      <h3>{{ title }}</h3>
+      <span style="font-size: 15px; font-weight: 800; border: 0 solid black;">{{ title }}</span>
+      <slot name="btn" />
     </div>
     <div
       class="aside-content"

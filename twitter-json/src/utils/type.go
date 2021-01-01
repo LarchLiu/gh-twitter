@@ -11,6 +11,7 @@ type (
 		LastTweetTime  int64
 		LastUpdateTime int64
 		TweetsCount    int64
+		Pages          int
 	}
 	// DbProfile type.
 	DbProfile struct {
@@ -34,5 +35,11 @@ type (
 	DbImage struct {
 		Key  string
 		User string
+	}
+	// UpdateInfo update info
+	UpdateInfo struct {
+		UpdateTime int64
+		IsUpdate   bool
+		Users      []string
 	}
 )
