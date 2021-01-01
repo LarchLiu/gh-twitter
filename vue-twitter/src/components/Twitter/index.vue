@@ -10,7 +10,7 @@
           {{ detail.TweetsCount }}
         </span>
         <span style="color: rgb(91, 112, 131); margin-right: 20px"> 推文</span>
-        <span style="color: rgb(91, 112, 131);">{{ "更新时间: " + getTime(detail.LastUpdateTime) }}</span>
+        <span style="color: rgb(91, 112, 131);">{{ "更新时间: " + getTime(updateTime) }}</span>
       </div>
       <div
         v-else
@@ -18,7 +18,7 @@
       >
         <span style="font-size: 15px; font-weight: 800; border: 0 solid black; margin-right: 20px">推文</span>
         <span v-if="Object.keys(detail).length > 0 && isAll" style="color: rgb(91, 112, 131);">
-          {{ "更新时间: " + getTime(detail.LastUpdateTime) }}
+          {{ "更新时间: " + getTime(updateTime) }}
         </span>
       </div>
     </fixed-header>
@@ -91,6 +91,10 @@ export default {
       default () {
         return {}
       }
+    },
+    updateTime: {
+      type: Number,
+      default: 0
     }
   },
   methods: {

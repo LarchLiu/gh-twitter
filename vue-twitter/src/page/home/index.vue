@@ -26,6 +26,7 @@
           <twitter
             v-if="currentUser === usersList[0].Username"
             class="detail"
+            :updateTime="updateTime"
             :isAll="true"
             :detail="usersData[currentUser]"
             :usersObj="usersListObj"
@@ -33,6 +34,7 @@
           <twitter
             v-else
             class="detail"
+            :updateTime="updateTime"
             :detail="usersData[currentUser]"
           />
         </div>
