@@ -27,7 +27,7 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - id: Cancel previous runs
+      - name: Cancel previous runs
         uses: ./actions/skip-duplicate-actions
         with:
           cancel_previous: 'true'
