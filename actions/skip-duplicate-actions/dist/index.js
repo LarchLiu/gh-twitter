@@ -10018,15 +10018,15 @@ async function cancelOutdatedRuns(context) {
     }
 }
 async function cancelPreviousRuns(context) {
-    const currentRun = context.currentRun;
     const cancelVictims = context.olderRuns.filter((run) => {
+        core.info(run.status);
         if (run.status === 'completed') {
             return false;
         }
-        return run.branch === currentRun.branch;
+        return true;
     });
     if (!cancelVictims.length) {
-        return core.info(`Did not find other workflow-runs to be cancelled`);
+        return core.info(`Did not find previous workflow-runs to be cancelled`);
     }
     for (const victim of cancelVictims) {
         await cancelWorkflowRun(victim, context);
