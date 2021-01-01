@@ -325,26 +325,24 @@ func main() {
 			jsonTwitterFromDB(collTweet, cfg.PicBed, jsonDir, name, count, cfg.PageSize, twitter)
 		}
 
-		userListPath := jsonDir + "userList.json"
+		fileName := "userList.json"
 		jsonBytes, err := json.Marshal(userInfoList)
 		if err != nil {
 			fmt.Println(err)
 		}
-		utils.WriteJSONFile(userListPath, jsonBytes)
-		key := "userList.json"
-		uploadJSON(cfg.PicBed, userListPath, key)
+		utils.WriteJSONFile(jsonDir, fileName, jsonBytes)
+		uploadJSON(cfg.PicBed, jsonDir+fileName, fileName)
 	}
 
 	// write and upload json file of updataInfo
 	updateInfo := utils.UpdateInfo{UpdateTime: time.Now().Unix(), IsUpdate: isUpdate, Users: updateUsers}
-	fileName := jsonDir + "updateInfo.json"
+	fileName := "updateInfo.json"
 	jsonBytes, err := json.Marshal(updateInfo)
 	if err != nil {
 		fmt.Println(err)
 	}
-	utils.WriteJSONFile(fileName, jsonBytes)
-	key := "updateInfo.json"
-	uploadJSON(cfg.PicBed, fileName, key)
+	utils.WriteJSONFile(jsonDir, fileName, jsonBytes)
+	uploadJSON(cfg.PicBed, jsonDir+fileName, fileName)
 
 	if !cfg.DbInit {
 		s, err := utils.GetFileContent(cfg.SettingsPath)
@@ -358,7 +356,7 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-			utils.WriteJSONFile(cfg.SettingsPath, jsonBytes)
+			utils.WriteJSONFileByPath(cfg.SettingsPath, jsonBytes)
 		}
 	}
 }

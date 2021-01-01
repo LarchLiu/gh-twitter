@@ -137,9 +137,25 @@ func getCorrectHref(href string, url string) (correctHref string, exist bool) {
 	return "", false
 }
 
-// WriteJSONFile wtrie json to file
-func WriteJSONFile(fileName string, jsonBytes []byte) {
-	file, er := os.OpenFile(fileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+// WriteJSONFile write json to file
+func WriteJSONFile(dir string, fileName string, jsonBytes []byte) {
+	exist := CheckDirExist(dir)
+	if exist {
+		file, er := os.OpenFile(dir+fileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+		defer func() { file.Close() }()
+		if er != nil {
+			fmt.Println(er)
+		}
+		_, err := file.Write(jsonBytes)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+}
+
+// WriteJSONFileByPath write json file by file path
+func WriteJSONFileByPath(filePath string, jsonBytes []byte) {
+	file, er := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	defer func() { file.Close() }()
 	if er != nil {
 		fmt.Println(er)
