@@ -7,19 +7,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  skip_job:
+  cancel_previous_runs:
     runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@master
+      - id: cancel_check
+        uses: ./actions/skip-duplicate-actions
         with:
-          do_not_skip: '[]'
+          cancel_previous: 'true'
 
   scraper:
-    needs: skip_job
-    if: ${{ needs.skip_job.outputs.should_skip != 'true' }}
+    needs: cancel_previous_runs
     runs-on: ubuntu-latest
 
     env:
