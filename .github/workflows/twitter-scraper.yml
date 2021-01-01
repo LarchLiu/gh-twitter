@@ -16,6 +16,7 @@ jobs:
         uses: fkirc/skip-duplicate-actions@master
         with:
           do_not_skip: '[]'
+          concurrent_skipping: 'outdated_runs'
 
   scraper:
     needs: skip_job
