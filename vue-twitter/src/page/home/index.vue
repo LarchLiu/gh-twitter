@@ -17,7 +17,9 @@
                 :key="i"
                 @click="changeUser(i)"
               >
-                <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
+                <a-badge :dot="needUpdate && (updateUser.findIndex(e => e === user.Username) >= 0)">
+                  <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
+                </a-badge>
               </div>
             </template>
           </aside-box>
@@ -52,7 +54,7 @@ import twitterApi from '@/api/twitter/index'
 import AsideBox from '@/components/AsideBox/index.vue'
 import Twitter from '@/components/Twitter/index.vue'
 import Octokit from '@/http/qiniu'
-import { arrToObj } from '@/utils/index'
+import { arrToObj, uniqueArr } from '@/utils/index'
 
 export default {
   components: { AsideBox, Twitter },
@@ -110,7 +112,9 @@ export default {
           updateTime.value = res.UpdateTime
           if (res.IsUpdate) {
             needUpdate.value = res.IsUpdate
-            updateUser.value = res.Users
+            updateUser.value = updateUser.value.concat(res.Users)
+            updateUser.value = uniqueArr(updateUser.value)
+            // updateUser.value = res.Users
           }
         }
       }).catch(e => {
@@ -148,6 +152,9 @@ export default {
     const changeUser = (i) => {
       currentUser.value = usersList.value[i].Username
       curPage.value = 1
+      if (updateUser.value.findIndex(e => e === currentUser.value) >= 0) {
+        getUserTweets(currentUser.value, 1)
+      }
     }
 
     const margeDetail = (tweet, profile) => {
@@ -179,6 +186,28 @@ export default {
         getUserList()
         for (let i = 0; i < updateUser.value.length; i++) {
           getUserTweets(updateUser.value[i], 1)
+        }
+      }
+    })
+
+    watch([needUpdate, updateUser], () => {
+      if (needUpdate.value) {
+        let hasUser = true
+        for (let i = 0; i < updateUser.value.length; i++) {
+          let flag = false
+          for (let j = 0; j < usersList.value.length; j++) {
+            if (updateUser.value[i] === usersList.value[j].Username) {
+              flag = true
+              break
+            }
+          }
+          if (!flag) {
+            hasUser = false
+            break
+          }
+        }
+        if (!hasUser) {
+          getUserList()
         }
       }
     })

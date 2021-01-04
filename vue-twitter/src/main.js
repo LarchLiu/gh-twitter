@@ -10,6 +10,7 @@ import axios from './http'
 // UI框架
 import {
   Avatar,
+  Badge,
   Button,
   Input,
   Form,
@@ -25,6 +26,7 @@ app.config.globalProperties.$message = message
 // ui注入
 app
   .use(Avatar)
+  .use(Badge)
   .use(Button)
   .use(Input)
   .use(Form)
