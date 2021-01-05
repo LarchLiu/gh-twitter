@@ -1,10 +1,9 @@
-name: user change
+name: change user
 on:
   repository_dispatch:
-    types: [changeuser]
+    types: [addusers, delusers]
 
 jobs:
-
   scraper:
     runs-on: ubuntu-latest
 
@@ -12,13 +11,24 @@ jobs:
       TZ: Asia/Shanghai
 
     steps:
+      - name: Set up Go 1.12
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.12
+        id: go
 
-    - name: Set up Go 1.12
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.12
-      id: go
+      - name: test
+        run: |
+          echo user change test!
+          echo payload ${{ toJson(github.event.client_payload) }}
+          echo action ${{ github.event.action }}
 
-    - name: test
-      run: |
-        echo user change test!
+      - name: add users
+        if: github.event.action == 'addusers'
+        run: |
+          echo add users cool
+
+       name: delete users
+        if: github.event.action == 'delusers'
+        run: |
+          echo delete users cool

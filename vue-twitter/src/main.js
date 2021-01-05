@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { store } from './store'
+import store from './store'
 import App from './App.vue'
 import router from './router'
 import './style/common.less'
@@ -14,6 +14,7 @@ import {
   Button,
   Input,
   Form,
+  Modal,
   message
 } from 'ant-design-vue'
 // import 'ant-design-vue/dist/antd.css'
@@ -30,6 +31,7 @@ app
   .use(Button)
   .use(Input)
   .use(Form)
+  .use(Modal)
 
 // 插件注入
 app.use(router)

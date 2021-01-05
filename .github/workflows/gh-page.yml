@@ -38,6 +38,7 @@ jobs:
           VUE_APP_PIC_BED: ${{ steps.settings.outputs.PicBed }}
           VUE_APP_QINIU_DOMAIN: ${{ secrets.QINIU_DOMAIN }}
           VUE_APP_QINIU_RESOURCE_PREFIX: ${{ secrets.QINIU_RESOURCE_PREFIX }}
+          VUE_APP_REPO_URL: /repos/${{ github.repository }}/dispatches
 
       - run: |
           cp -r ${{ github.workspace }}/twitter-json/raw/twitter ${{ github.workspace }}/vue-twitter/dist

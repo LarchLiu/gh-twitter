@@ -34,6 +34,7 @@
 <script>
 import { getCurrentInstance, reactive } from 'vue'
 import { useForm } from '@ant-design-vue/use'
+import { useStore } from 'vuex'
 
 export default {
   setup () {
@@ -41,6 +42,7 @@ export default {
     const { ctx } = getCurrentInstance()
     const labelCol = { span: 4 }
     const wrapperCol = { span: 14 }
+    const store = useStore()
 
     // form表单内容
     const form = reactive({
@@ -72,6 +74,8 @@ export default {
     // submit
     const onSubmit = (e) => {
       e.preventDefault()
+
+      store.dispatch('setGHToken', form.password)
 
       validate()
         .then(() => {
