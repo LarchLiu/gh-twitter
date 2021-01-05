@@ -165,7 +165,8 @@ func main() {
 
 	if info.Type == "addusers" || info.Type == "delusers" {
 		// DbInit 为 false 前端不允许触发此 action
-		for _, user := range info.Users {
+		users := strings.Split(info.Users, ",")
+		for _, user := range users {
 			one := utils.DbProfile{}
 			count, err := collProfile.Find(ctx, bson.M{"userinfo.username": user}).Count()
 			if err != nil {
