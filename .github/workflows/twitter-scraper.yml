@@ -51,12 +51,12 @@ jobs:
 
       - name: Get dependencies
         run: go get -v -t -d ./...
-          working-directory: twitter-json
+        working-directory: twitter-json
 
       - name: Users change
         if: ${{ github.event.action == 'addusers' || github.event.action == 'delusers' }}
         run: go run main.go
-          working-directory: twitter-json
+        working-directory: twitter-json
         env:
           PIC_BED: ${{ steps.settings.outputs.PicBed }}
           DB_INIT: ${{ steps.settings.outputs.DbInit }}
@@ -74,7 +74,7 @@ jobs:
       - name: Run scraper
         if: ${{ !(github.event.action=='addusers' || github.event.action=='delusers') }}
         run: go run main.go
-          working-directory: twitter-json
+        working-directory: twitter-json
         env:
           PIC_BED: ${{ steps.settings.outputs.PicBed }}
           DB_INIT: ${{ steps.settings.outputs.DbInit }}
