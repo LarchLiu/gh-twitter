@@ -28,7 +28,7 @@ jobs:
         run: |
           echo add users cool
 
-       name: delete users
+      - name: delete users
         if: github.event.action == 'delusers'
         run: |
           echo delete users cool
