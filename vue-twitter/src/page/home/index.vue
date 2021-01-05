@@ -163,7 +163,7 @@ export default {
 
     const addUsersAction = () => {
       addUserVisible.value = false
-      const users = inputUsers.value.replace(/@/g, '').replace(/\s+/g, ',')
+      const users = inputUsers.value.replace(/@/g, '').replace(/\s+/g, ',').split(',')
       console.log(users)
       actionChangeUser('addusers', users)
       inputUsers.value = ''
