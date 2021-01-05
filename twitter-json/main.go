@@ -24,7 +24,11 @@ func checkImageExist(picBed string, coll *qmgo.Collection, user string, path str
 	ghPath = "." + pathReg.FindStringSubmatch(path)[1]
 	ret = utils.DbImage{User: user}
 	if picBed == "qiniu" {
-		e, key := model.DbCheckImageExist(coll, fmt.Sprintf("%s/%s/%s/%s", os.Getenv("QINIU_RESOURCE_PREFIX"), "images", user, name))
+		prefix := model.QiniuGetResourcePrefix()
+		joinKey := fmt.Sprintf("%s/%s/%s/%s", prefix, "images", user, name)
+		// 如果 prefix 为空需删除开头的 /
+		joinKey = strings.TrimPrefix(joinKey, "/")
+		e, key := model.DbCheckImageExist(coll, joinKey)
 		exist = e
 		ret.Key = key
 	} else {
@@ -57,8 +61,11 @@ func uploadImage(picBed string, coll *qmgo.Collection, user string, path string,
 
 func uploadJSON(picBed string, path string, key string) (url string, err error) {
 	if picBed == "qiniu" {
-		key := fmt.Sprintf("%s/%s/%s", os.Getenv("QINIU_RESOURCE_PREFIX"), "json", key)
-		retQiniu, err := model.QiniuUpload(path, key)
+		prefix := model.QiniuGetResourcePrefix()
+		joinKey := fmt.Sprintf("%s/%s/%s", prefix, "json", key)
+		// 如果 prefix 为空需删除开头的 /
+		joinKey = strings.TrimPrefix(joinKey, "/")
+		retQiniu, err := model.QiniuUpload(path, joinKey)
 		if err != nil {
 			return "", err
 		}

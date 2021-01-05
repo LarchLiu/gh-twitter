@@ -2,13 +2,15 @@ import API from '@/utils/request-api'
 import QiniuOctokit from '@/http/qiniu'
 
 const baseUrl = './twitter'
+const qiniuPrefix = process.env.VUE_APP_QINIU_RESOURCE_PREFIX.replace(/^\/*|\/*$/g, '')
 
 function getUsersData () {
   let jsonPath = '/json/userList.json'
   if (process.env.VUE_APP_PIC_BED === 'qiniu') {
     jsonPath += '?v=' + (new Date()).getTime()
     return new Promise((resolve, reject) => {
-      QiniuOctokit.request('GET /' + process.env.VUE_APP_QINIU_RESOURCE_PREFIX + jsonPath).then(response => {
+      const path = (qiniuPrefix + jsonPath).replace(/^\/*|\/*$/g, '')
+      QiniuOctokit.request('GET /' + path).then(response => {
         const { data } = response
         resolve(data)
       }).catch(_ => {
@@ -25,7 +27,8 @@ function getTweetsData (user, page) {
   if (process.env.VUE_APP_PIC_BED === 'qiniu') {
     jsonPath += '?v=' + (new Date()).getTime()
     return new Promise((resolve, reject) => {
-      QiniuOctokit.request('GET /' + process.env.VUE_APP_QINIU_RESOURCE_PREFIX + jsonPath).then(response => {
+      const path = (qiniuPrefix + jsonPath).replace(/^\/*|\/*$/g, '')
+      QiniuOctokit.request('GET /' + path).then(response => {
         const { data } = response
         resolve(data)
       }).catch(_ => {
@@ -42,7 +45,8 @@ function getUpdateInfo () {
   if (process.env.VUE_APP_PIC_BED === 'qiniu') {
     jsonPath += '?v=' + (new Date()).getTime()
     return new Promise((resolve, reject) => {
-      QiniuOctokit.request('GET /' + process.env.VUE_APP_QINIU_RESOURCE_PREFIX + jsonPath).then(response => {
+      const path = (qiniuPrefix + jsonPath).replace(/^\/*|\/*$/g, '')
+      QiniuOctokit.request('GET /' + path).then(response => {
         const { data } = response
         resolve(data)
       }).catch(_ => {

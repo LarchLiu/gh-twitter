@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/qiniu/api.v7/v7/auth/qbox"
 	"github.com/qiniu/api.v7/v7/storage"
@@ -22,7 +23,15 @@ var domain string = os.Getenv("QINIU_DOMAIN")
 var bucket string = os.Getenv("QINIU_BUCKET")
 var accessKey string = os.Getenv("QINIU_ACCESS_KEY")
 var secretKey string = os.Getenv("QINIU_SECRET_KEY")
-var jsonPrefix string = os.Getenv("QINIU_RESOURCE_PREFIX") + "/json/"
+var jsonPrefix string = strings.TrimPrefix(QiniuGetResourcePrefix()+"/json/", "/")
+
+// QiniuGetResourcePrefix .
+func QiniuGetResourcePrefix() string {
+	// 删除 QINIU_RESOURCE_PREFIX 开头和结尾的 /
+	prefix := strings.TrimPrefix(os.Getenv("QINIU_RESOURCE_PREFIX"), "/")
+	prefix = strings.TrimSuffix(prefix, "/")
+	return prefix
+}
 
 // QiniuUpload qiniu api to upload file.
 func QiniuUpload(filePath string, key string) (ret QiniuRet, err error) {

@@ -76,6 +76,8 @@ github.com/n0madic/twitter-scraper v0.0.0-20201217095613-7628f22c6ca3 h1:WuCpy9T
 github.com/n0madic/twitter-scraper v0.0.0-20201217095613-7628f22c6ca3/go.mod h1:uzFP7WK9gCykBnULzfmxScXgIbs+423tWjbHRLYVq/g=
 github.com/n0madic/twitter-scraper v0.0.0-20201218132833-0275c93c3738 h1:K6lEnqnDrLG/OIdQVgbAl5D+lx9aRYonPULxrdaVtt0=
 github.com/n0madic/twitter-scraper v0.0.0-20201218132833-0275c93c3738/go.mod h1:uzFP7WK9gCykBnULzfmxScXgIbs+423tWjbHRLYVq/g=
+github.com/n0madic/twitter-scraper v0.0.0-20210105131527-afb1870115a6 h1:koU7H/XPI/G1udik7aDyADMVy3shCxJ4a8mLlthevhw=
+github.com/n0madic/twitter-scraper v0.0.0-20210105131527-afb1870115a6/go.mod h1:uzFP7WK9gCykBnULzfmxScXgIbs+423tWjbHRLYVq/g=
 github.com/pelletier/go-toml v1.4.0/go.mod h1:PN7xzY2wHTK0K9p34ErDQMlFxa51Fk0OUruD3k1mMwo=
 github.com/pelletier/go-toml v1.7.0/go.mod h1:vwGMzjaWMwyfHwgIBhI2YUM4fB6nL6lVAvS1LBMMhTE=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=

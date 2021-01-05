@@ -53,7 +53,7 @@ jobs:
         run: go get -v -t -d ./...
         working-directory: twitter-json
 
-      - name: Users change
+      - name: Change users and run scraper
         if: ${{ github.event.action == 'addusers' || github.event.action == 'delusers' }}
         run: go run main.go
         working-directory: twitter-json

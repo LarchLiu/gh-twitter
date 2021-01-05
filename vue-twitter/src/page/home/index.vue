@@ -46,13 +46,13 @@
                 @click="changeUser(i)"
               >
                 <a-badge :dot="needUpdate && (updateUser.findIndex(e => e === user.Username) >= 0)">
-                  <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name }}</a>
+                  <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name ? user.Name : user.Username }}</a>
                 </a-badge>
               </div>
             </template>
           </aside-box>
         </div>
-        <div v-if="usersList.length > 0 && Object.keys(usersData).length === usersList.length" class="tweets">
+        <div v-if="usersList.length > 0 && usersData[currentUser]" class="tweets">
           <twitter
             v-if="currentUser === usersList[0].Username"
             class="detail"
@@ -163,8 +163,7 @@ export default {
 
     const addUsersAction = () => {
       addUserVisible.value = false
-      const users = inputUsers.value.replace(/@/g, '').replace(/\s+/g, ',')
-      console.log(users)
+      const users = inputUsers.value.replace(/@/g, '').replace(/\s+/g, ',').replace(/^,*|,*$/g, '')
       actionChangeUser('addusers', users)
       inputUsers.value = ''
     }

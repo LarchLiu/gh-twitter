@@ -10,16 +10,18 @@
           {{ detail.TweetsCount }}
         </span>
         <span style="color: rgb(91, 112, 131); margin-right: 20px"> 推文</span>
-        <span style="color: rgb(91, 112, 131);">{{ "更新时间: " + getTime(updateTime) }}</span>
+        <div class="floating">
+          <p style="color: rgb(91, 112, 131);">{{ "更新时间: " + getTime(updateTime) }}</p>
+        </div>
       </div>
       <div
         v-else
         class="header"
       >
         <span style="font-size: 15px; font-weight: 800; border: 0 solid black; margin-right: 20px">推文</span>
-        <span v-if="Object.keys(detail).length > 0 && isAll" style="color: rgb(91, 112, 131);">
-          {{ "更新时间: " + getTime(updateTime) }}
-        </span>
+        <div v-if="Object.keys(detail).length > 0 && isAll" class="floating">
+          <p style="color: rgb(91, 112, 131);">{{ "更新时间: " + getTime(updateTime) }}</p>
+        </div>
       </div>
     </fixed-header>
     <div
@@ -122,11 +124,16 @@ export default {
       padding: 10px;
       background-color: #f7f7f7;
       border: 1px solid #eee;
-      h3 {
-        max-width: 160px;
-        height: 18px;
-        overflow: hidden;
-        margin: 0;
+
+      .floating {
+        display: table;
+        float: right;
+        height: 23px;
+      }
+      .floating p {
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
       }
     }
     .content {
