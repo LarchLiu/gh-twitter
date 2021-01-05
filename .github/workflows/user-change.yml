@@ -17,11 +17,8 @@ jobs:
           go-version: 1.12
         id: go
 
-      - name: test
-        run: |
-          echo user change test!
-          echo payload ${{ toJson(github.event.client_payload) }}
-          echo action ${{ github.event.action }}
+      - run: 'echo "field: ${{ github.event.client_payload.users }}"'
+      - run: 'echo "payload: ${{ toJson(github.event.client_payload) }}"'
 
       - name: add users
         if: github.event.action == 'addusers'
