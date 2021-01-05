@@ -10,12 +10,12 @@
           >
             <template v-slot:btn>
               <span style="float: right">
-                <PlusOutlined v-if="ghToken" style="margin-right: 4px" @click="addUserVisible=true" />
+                <PlusOutlined v-if="ghToken && dbInit" style="margin-right: 4px" @click="addUserVisible=true" />
                 <SyncOutlined v-if="ghToken" style="margin-right: 4px" @click="actionScraper" />
                 <SettingFilled @click="visible = true"/>
                 <a-modal
                   :visible="visible"
-                  title="Modal"
+                  title="Add Token"
                   ok-text="确认"
                   cancel-text="取消"
                   @cancel="cancelInput"
@@ -111,6 +111,7 @@ export default {
     const store = useStore()
     const ghToken = computed(() => store.getters.gh_token)
     const repoUrl = process.env.VUE_APP_REPO_URL
+    const dbInit = process.env.VUE_APP_DB_INIT
     let timer
     let ghApi
 
@@ -336,7 +337,8 @@ export default {
       addUserVisible,
       inputUsers,
       addUsersAction,
-      cancelUserInput
+      cancelUserInput,
+      dbInit
     }
   }
 }

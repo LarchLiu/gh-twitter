@@ -3,7 +3,7 @@ on:
   schedule:
     - cron: "0 * * * *"
   repository_dispatch:
-    types: [scraper]
+    types: [scraper, addusers, delusers]
   workflow_dispatch:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
       - name: Cancel Previous Runs Actions
         uses: LarchLiu/cancel_previous_runs@V1.0.0
         with:
-          cancel_previous: 'true'
+          cancel_previous: "true"
 
   scraper:
     needs: cancel_previous
@@ -49,22 +49,32 @@ jobs:
           mongoimport -h localhost:27017 -d twitter -c images ./twitter-json/raw/mongodb/images.json
           mongoimport -h localhost:27017 -d twitter -c tweets ./twitter-json/raw/mongodb/tweets.json
 
-      - name: Git pull
-        run: |
-          git config --local user.email ${{ github.actor }}@users.noreply.github.com
-          git config --local user.name ${{ github.actor }}
-          git remote set-url origin https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          git pull
-
       - name: Get dependencies
-        run: |
-          cd twitter-json
-          go get -v -t -d ./...
+        run: go get -v -t -d ./...
+          working-directory: twitter-json
 
-      - name: Run scaper
-        run: |
-          cd twitter-json
-          go run main.go
+      - name: Users change
+        if: ${{ github.event.action == 'addusers' || github.event.action == 'delusers' }}
+        run: go run main.go
+          working-directory: twitter-json
+        env:
+          PIC_BED: ${{ steps.settings.outputs.PicBed }}
+          DB_INIT: ${{ steps.settings.outputs.DbInit }}
+          USE_WEBHOOK: ${{ steps.settings.outputs.UseWebhook }}
+          PAGE_SIZE: ${{ steps.settings.outputs.PageSize }}
+          SETTINGS_PATH: ${{ steps.settings.outputs.SettingsPath }}
+          EVENT_TYPE: ${{ github.event.action }}
+          USERS_DATA: ${{ github.event.client_payload.users }}
+          QINIU_ACCESS_KEY: ${{ secrets.QINIU_ACCESS_KEY }}
+          QINIU_BUCKET: ${{ secrets.QINIU_BUCKET }}
+          QINIU_DOMAIN: ${{ secrets.QINIU_DOMAIN }}
+          QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
+          QINIU_RESOURCE_PREFIX: ${{ secrets.QINIU_RESOURCE_PREFIX }}
+
+      - name: Run scraper
+        if: ${{ !(github.event.action=='addusers' || github.event.action=='delusers') }}
+        run: go run main.go
+          working-directory: twitter-json
         env:
           PIC_BED: ${{ steps.settings.outputs.PicBed }}
           DB_INIT: ${{ steps.settings.outputs.DbInit }}
@@ -85,6 +95,8 @@ jobs:
 
       - name: Git push
         run: |
+          git config --local user.email ${{ github.actor }}@users.noreply.github.com
+          git config --local user.name ${{ github.actor }}
           git add .
           git commit -m "update by github action"
           git push

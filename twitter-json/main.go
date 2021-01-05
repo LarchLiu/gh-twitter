@@ -143,6 +143,11 @@ func jsonTwitterFromDB(coll *qmgo.Collection, picBed string, dir string, selUser
 }
 
 func main() {
+	info := utils.UserChangeInfo{}
+	if err := env.Parse(&info); err != nil {
+		fmt.Printf("%+v\n", err)
+	}
+
 	cfg := utils.Settings{}
 	if err := env.Parse(&cfg); err != nil {
 		fmt.Printf("%+v\n", err)
@@ -157,6 +162,28 @@ func main() {
 	defer func() {
 		model.DbClose(cli)
 	}()
+
+	if info.Type == "addusers" || info.Type == "delusers" {
+		// DbInit 为 false 前端不允许触发此 action
+		for _, user := range info.Users {
+			one := utils.DbProfile{}
+			count, err := collProfile.Find(ctx, bson.M{"userinfo.username": user}).Count()
+			if err != nil {
+				fmt.Println(err)
+			}
+			if count > 0 {
+				if info.Type == "delusers" {
+					collProfile.Remove(ctx, bson.M{"userinfo.username": user})
+				}
+				continue
+			}
+
+			if info.Type == "addusers" {
+				one.Username = user
+				collProfile.InsertOne(ctx, utils.DbProfile{UserInfo: one.UserInfo})
+			}
+		}
+	}
 
 	var users []string
 	var userInfoList []utils.UserInfo

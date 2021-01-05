@@ -42,4 +42,9 @@ type (
 		IsUpdate   bool
 		Users      []string
 	}
+	// UserChangeInfo users change info
+	UserChangeInfo struct {
+		Type  string   `env:"EVENT_TYPE" envDefault:""`
+		Users []string `env:"USERS_DATA" envDefault:"[]"`
+	}
 )
