@@ -55,7 +55,6 @@
         <div v-if="usersList.length > 0 && usersData[currentUser]" class="tweets">
           <twitter
             v-if="currentUser === usersList[0].Username"
-            class="detail"
             :updateTime="updateTime"
             :isAll="true"
             :detail="usersData[currentUser]"
@@ -63,15 +62,23 @@
           />
           <twitter
             v-else
-            class="detail"
             :updateTime="updateTime"
             :detail="usersData[currentUser]"
           />
+          <fixed-footer :check-fixed="checkFixed" :width-self="true">
+            <div class="pagination">
+              <a-pagination
+                :current="curPage"
+                :total="usersListObj[currentUser].TweetsCount"
+                :pageSize="pageSize"
+                @change="changePage"
+              />
+            </div>
+          </fixed-footer>
         </div>
-        <twitter
-            v-else
-            class="detail"
-          />
+        <div v-else class="tweets">
+          <twitter />
+        </div>
       </div>
     </div>
   </div>
@@ -82,6 +89,7 @@ import { useStore } from 'vuex'
 import twitterApi from '@/api/twitter/index'
 import AsideBox from '@/components/AsideBox/index.vue'
 import Twitter from '@/components/Twitter/index.vue'
+import FixedFooter from '@/components/FixedFooter/index.vue'
 import { Octokit } from '@octokit/core'
 import { arrToObj, uniqueArr } from '@/utils/index'
 import { message } from 'ant-design-vue'
@@ -92,7 +100,7 @@ import {
 } from '@ant-design/icons-vue'
 
 export default {
-  components: { AsideBox, PlusOutlined, SettingFilled, SyncOutlined, Twitter },
+  components: { AsideBox, PlusOutlined, SettingFilled, SyncOutlined, Twitter, FixedFooter },
   setup () {
     const { ctx } = getCurrentInstance()
     const updateUser = ref([])
@@ -104,6 +112,7 @@ export default {
     const inputUsers = ref('')
     const curPage = ref(1)
     const updateTime = ref(0)
+    const checkFixed = ref(0)
     const needUpdate = ref(false)
     const triggerUpdate = ref(false)
     const triggerChangeUsers = ref(false)
@@ -112,6 +121,7 @@ export default {
     const store = useStore()
     const ghToken = computed(() => store.getters.gh_token)
     const repoUrl = process.env.VUE_APP_REPO_URL
+    const pageSize = Number(process.env.VUE_APP_PAGE_SIZE)
     let timer
     let ghApi
 
@@ -213,12 +223,10 @@ export default {
 
     const dataInit = () => {
       twitterApi.getUsersData().then(res => {
-        updateUser.value = res.map(item => {
-          return item.Username
-        })
         usersList.value = res
         usersListObj.value = arrToObj(res, 'Username')
         currentUser.value = res[0].Username
+        updateUser.value.push(currentUser.value)
         twitterApi.getUpdateInfo().then(info => {
           updateTime.value = info.UpdateTime
         }).catch(e => {
@@ -241,7 +249,6 @@ export default {
             needUpdate.value = res.IsUpdate
             updateUser.value = updateUser.value.concat(res.Users)
             updateUser.value = uniqueArr(updateUser.value)
-            // updateUser.value = res.Users
           }
         }
       }).catch(e => {
@@ -254,7 +261,6 @@ export default {
       twitterApi.getUsersData().then(res => {
         usersList.value = res
         usersListObj.value = arrToObj(res, 'Username')
-        // currentUser.value = res[0].Username
       }).catch(e => {
         console.log(e)
         usersList.value = []
@@ -268,8 +274,9 @@ export default {
         if (updateUser.value.length === 0) {
           needUpdate.value = false
         }
-        // usersListSort.value.push(data.Profile.Name)
-        // console.log(data)
+        ctx.$nextTick(() => {
+          checkFixed.value++
+        })
       }).catch(err => {
         console.log(err)
       })
@@ -278,9 +285,16 @@ export default {
     const changeUser = (i) => {
       currentUser.value = usersList.value[i].Username
       curPage.value = 1
-      if (updateUser.value.findIndex(e => e === currentUser.value) >= 0) {
-        getUserTweets(currentUser.value, 1)
-      }
+      document.body.scrollTop = document.documentElement.scrollTop = 0
+      // scrollTo(0, 0)
+      getUserTweets(currentUser.value, curPage.value)
+    }
+
+    const changePage = (page, pageSize) => {
+      curPage.value = page
+      document.body.scrollTop = document.documentElement.scrollTop = 0
+      // scrollTo(0, 0)
+      getUserTweets(currentUser.value, curPage.value)
     }
 
     const margeDetail = (tweet, profile) => {
@@ -303,45 +317,13 @@ export default {
       window.clearInterval(timer)
     })
 
-    // watch(usersList, () => {
-    //   usersData.value = {}
-    //   for (let i = 0; i < usersList.value.length; i++) {
-    //     getUserTweets(usersList.value[i].Username, curPage.value)
-    //   }
-    // })
-
-    watch([updateTime, triggerUpdate], ([time, trigger], [preTime, preTrigger]) => {
-      if (time !== preTime && triggerUpdate.value) {
+    watch(updateTime, () => {
+      if (triggerUpdate.value) {
         triggerUpdate.value = false
       }
-    })
-
-    watch([updateTime, triggerChangeUsers], ([time, trigger], [preTime, preTrigger]) => {
-      if (time !== preTime && triggerChangeUsers.value) {
+      if (triggerChangeUsers.value) {
         triggerChangeUsers.value = false
-      }
-    })
-
-    watch([needUpdate, updateUser], () => {
-      if (needUpdate.value) {
-        let hasUser = true
-        for (let i = 0; i < updateUser.value.length; i++) {
-          let flag = false
-          for (let j = 0; j < usersList.value.length; j++) {
-            if (updateUser.value[i] === usersList.value[j].Username) {
-              flag = true
-              break
-            }
-          }
-          if (!flag) {
-            hasUser = false
-            break
-          }
-        }
-        // 有新增用户重新获取用户列表
-        if (!hasUser) {
-          getUserList()
-        }
+        getUserList()
       }
     })
 
@@ -379,7 +361,10 @@ export default {
       inputUsers,
       addUsersAction,
       cancelUserInput,
-      handleAddUsers
+      handleAddUsers,
+      pageSize,
+      changePage,
+      checkFixed
     }
   }
 }
@@ -410,10 +395,23 @@ export default {
           color: black;
         }
       }
-      .detail {
+      .tweets {
         float: right;
         width: 600px;
         min-height: 220px;
+
+        .pagination {
+          text-align: center;
+          padding: 4px 0;
+        }
+
+        :deep(.fixed-footer) {
+          position:fixed;
+          bottom:0;
+          z-index:999;
+          border: 1px solid #eee;
+          background-color:#f7f7f7ee;
+        }
       }
     }
   }

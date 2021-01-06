@@ -5,21 +5,21 @@
         <slot />
       </div>
     </div>
-    <div v-if="fixed" :style="{paddingTop: fixed_element_height + 'px'}" />
+    <div v-if="fixed" :style="{paddingBottom: fixed_element_height + 'px'}" />
   </div>
 </template>
 
 <script>
 import _ from 'lodash'
 /**
- * 支持传递组件的内部 class name 来 fixed 内部组件
- * 同一页面如有多个 FixedHeader 请为每个组件传递 idName, 因为是通过 id 找到具体的组件, 如果 id 相同多个组件无法区分
- * 单个 FixedHeader 可不用传递 idName, 只需在页面定义默认的名为 fixed-header 的样式, 不考虑层级关系可以定义 /deep/.fixed-header
- * 不用默认样式名称需传入自定义的 styleClassName
-*/
+   * 支持传递组件的内部 class name 来 fixed 内部组件
+   * 同一页面如有多个 FixedFooter 请为每个组件传递 idName, 因为是通过 id 找到具体的组件, 如果 id 相同多个组件无法区分
+   * 单个 FixedHeader 可不用传递 idName, 只需在页面定义默认的名为 fixed-footer 的样式, 不考虑层级关系可以定义 /deep/.fixed-footer
+   * 不用默认样式名称需传入自定义的 styleClassName
+   */
 
 export default {
-  name: 'FixedHeader',
+  name: 'FixedFooter',
   props: {
     // 需要 fixed 组件 id 名称，用于定位组件
     idName: {
@@ -29,12 +29,16 @@ export default {
     // 组件 fixed 时的样式名称
     styleClassName: {
       type: String,
-      default: 'fixed-header'
+      default: 'fixed-footer'
     },
     // 需要 fixed 组件中的子组件 class name, 用于定位到此子组件
     childClassName: {
       type: String,
       default: null
+    },
+    checkFixed: {
+      type: Number,
+      default: 0
     },
     widthSelf: {
       type: Boolean,
@@ -51,9 +55,6 @@ export default {
     }
   },
   computed: {
-    offset_top () {
-      return this.getElementToPageTop(this.fixed_element)
-    },
     id_name () {
       return this.id_name_pre + this.idName
     }
@@ -64,13 +65,16 @@ export default {
         val ? this.addFixedClass(this.fixed_element, this.styleClassName) : this.removeFixedClass(this.fixed_element, this.styleClassName)
       }
       this.$emit('change', val)
+    },
+    checkFixed () {
+      this.handleScroll()
     }
   },
   mounted () {
     window.addEventListener('scroll', _.throttle(this.handleScroll, 50))
-    const element = document.querySelector('#' + this.id_name)
+    const element = document.querySelector(`#${this.id_name}`)
     if (this.childClassName) {
-      const childElement = element.querySelector('.' + this.childClassName)
+      const childElement = element.querySelector(`.${this.childClassName}`)
       if (childElement) {
         this.fixed_element = childElement
       } else {
@@ -102,6 +106,7 @@ export default {
         top += el.offsetTop
         el = el.offsetParent
       }
+      top += this.fixed_element_height
       return top
     },
     addFixedClass (dom, cls) {
@@ -131,7 +136,7 @@ export default {
     },
     handleScroll () {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
-      this.fixed = scrollTop > this.offset_top
+      this.fixed = scrollTop + window.innerHeight < this.getElementToPageTop(this.fixed_element) // 有可能组件增高或降低，需实时读取高度
     }
   }
 }

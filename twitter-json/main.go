@@ -180,7 +180,9 @@ func main() {
 			}
 			if count > 0 {
 				if info.Type == "delusers" {
-					collProfile.Remove(ctx, bson.M{"userinfo.username": user})
+					collProfile.RemoveAll(ctx, bson.M{"userinfo.username": user})
+					collTweet.RemoveAll(ctx, bson.M{"username": user})
+					collImage.RemoveAll(ctx, bson.M{"user": user})
 				}
 				continue
 			}
@@ -342,7 +344,7 @@ func main() {
 		}
 	}
 
-	if isUpdate {
+	if isUpdate || info.Type == "delusers" {
 		name := "@all"
 		twitter := utils.Twitter{}
 		count, err := collTweet.Find(ctx, bson.M{}).Count()
