@@ -9,15 +9,18 @@ on:
 jobs:
   cancel_previous:
     runs-on: ubuntu-latest
-
+    outputs:
+      should_skip: ${{ steps.cancel_check.outputs.should_skip }}
     steps:
       - name: Cancel Previous Runs Actions
-        uses: LarchLiu/cancel_previous_runs@V1.0.0
+        id: cancel_check
+        uses: LarchLiu/cancel_previous_runs@V1.1.0
         with:
           cancel_previous: "true"
 
   scraper:
     needs: cancel_previous
+    if: ${{ needs.cancel_previous.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
 
     env:
