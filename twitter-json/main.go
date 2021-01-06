@@ -171,7 +171,6 @@ func main() {
 	}()
 
 	if info.Type == "addusers" || info.Type == "delusers" {
-		// DbInit 为 false 前端不允许触发此 action
 		users := strings.Split(info.Users, ",")
 		for _, user := range users {
 			one := utils.DbProfile{}

@@ -10,7 +10,7 @@
           >
             <template v-slot:btn>
               <span style="float: right">
-                <PlusOutlined v-if="ghToken && dbInit" style="margin-right: 4px" @click="addUserVisible=true" />
+                <PlusOutlined v-if="ghToken" style="margin-right: 4px" @click="handleAddUsers" />
                 <SyncOutlined v-if="ghToken" style="margin-right: 4px" @click="actionScraper" />
                 <SettingFilled @click="visible = true"/>
                 <a-modal
@@ -106,12 +106,12 @@ export default {
     const updateTime = ref(0)
     const needUpdate = ref(false)
     const triggerUpdate = ref(false)
+    const triggerChangeUsers = ref(false)
     const visible = ref(false)
     const addUserVisible = ref(false)
     const store = useStore()
     const ghToken = computed(() => store.getters.gh_token)
     const repoUrl = process.env.VUE_APP_REPO_URL
-    const dbInit = process.env.VUE_APP_DB_INIT
     let timer
     let ghApi
 
@@ -122,27 +122,42 @@ export default {
     }
 
     const actionScraper = () => {
-      ghApi.request(`POST ${repoUrl}`, {
-        event_type: 'scraper'
-      }).then(res => {
-        message.success({
-          content: '更新请求已发出，请等待3-4分钟',
+      if (triggerUpdate.value) {
+        message.warning({
+          content: '更新请求未完毕，请耐心等待',
           duration: 3
         })
-      }).catch(err => {
-        console.log(err)
-      })
+      } else if (triggerChangeUsers.value) {
+        message.warning({
+          content: '更改用户请求未完毕，请耐心等待',
+          duration: 3
+        })
+      } else {
+        ghApi.request(`POST ${repoUrl}`, {
+          event_type: 'scraper'
+        }).then(res => {
+          triggerUpdate.value = true
+          message.success({
+            content: '更新请求已发出，请等待3-4分钟',
+            duration: 3
+          })
+        }).catch(err => {
+          console.log(err)
+        })
+      }
     }
 
-    const actionChangeUser = (type, users) => {
+    const actionChangeUsers = (type, users) => {
       ghApi.request(`POST ${repoUrl}`, {
         event_type: type,
         client_payload: {
           users: users
         }
       }).then(res => {
+        triggerChangeUsers.value = true
+        const content = type === 'addusers' ? '添加' : '删除'
         message.success({
-          content: '添加用户请求已发出，请等待3-4分钟',
+          content: content + '用户请求已发出，请等待3-4分钟',
           duration: 3
         })
       }).catch(err => {
@@ -161,10 +176,33 @@ export default {
       inputToken.value = ''
     }
 
+    const handleAddUsers = () => {
+      if (triggerUpdate.value) {
+        message.warning({
+          content: '更新请求未完毕，请耐心等待',
+          duration: 3
+        })
+      } else if (triggerChangeUsers.value) {
+        message.warning({
+          content: '更改用户请求未完毕，请耐心等待',
+          duration: 3
+        })
+      } else {
+        addUserVisible.value = true
+      }
+    }
+
     const addUsersAction = () => {
       addUserVisible.value = false
       const users = inputUsers.value.replace(/@/g, '').replace(/\s+/g, ',').replace(/^,*|,*$/g, '')
-      actionChangeUser('addusers', users)
+      if (users) {
+        actionChangeUsers('addusers', users)
+      } else {
+        message.warning({
+          content: '用户名为空',
+          duration: 3
+        })
+      }
       inputUsers.value = ''
     }
 
@@ -229,7 +267,6 @@ export default {
         updateUser.value.splice(updateUser.value.findIndex(e => e === user), 1)
         if (updateUser.value.length === 0) {
           needUpdate.value = false
-          triggerUpdate.value = false
         }
         // usersListSort.value.push(data.Profile.Name)
         // console.log(data)
@@ -259,7 +296,7 @@ export default {
         setTimeout(() => {
           getUpdateInfo()
         }, 0)
-      }, 60000)
+      }, 120000)
     })
 
     onUnmounted(() => {
@@ -273,12 +310,15 @@ export default {
     //   }
     // })
 
-    watch([needUpdate, triggerUpdate], () => {
-      if (needUpdate.value && triggerUpdate.value) {
-        getUserList()
-        for (let i = 0; i < updateUser.value.length; i++) {
-          getUserTweets(updateUser.value[i], 1)
-        }
+    watch([updateTime, triggerUpdate], ([time, trigger], [preTime, preTrigger]) => {
+      if (time !== preTime && triggerUpdate.value) {
+        triggerUpdate.value = false
+      }
+    })
+
+    watch([updateTime, triggerChangeUsers], ([time, trigger], [preTime, preTrigger]) => {
+      if (time !== preTime && triggerChangeUsers.value) {
+        triggerChangeUsers.value = false
       }
     })
 
@@ -298,6 +338,7 @@ export default {
             break
           }
         }
+        // 有新增用户重新获取用户列表
         if (!hasUser) {
           getUserList()
         }
@@ -321,12 +362,13 @@ export default {
       changeUser,
       onExit,
       actionScraper,
-      actionChangeUser,
+      actionChangeUsers,
       margeDetail,
       usersListObj,
       updateUser,
       needUpdate,
       triggerUpdate,
+      triggerChangeUsers,
       updateTime,
       ghToken,
       setGHToken,
@@ -337,7 +379,7 @@ export default {
       inputUsers,
       addUsersAction,
       cancelUserInput,
-      dbInit
+      handleAddUsers
     }
   }
 }
