@@ -84,7 +84,7 @@
   </div>
 </template>
 <script>
-import { ref, getCurrentInstance, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, getCurrentInstance, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import twitterApi from '@/api/twitter/index'
 import AsideBox from '@/components/AsideBox/index.vue'
@@ -274,7 +274,7 @@ export default {
         if (updateUser.value.length === 0) {
           needUpdate.value = false
         }
-        ctx.$nextTick(() => {
+        nextTick(() => {
           checkFixed.value++
         })
       }).catch(err => {
