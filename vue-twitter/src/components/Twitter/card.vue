@@ -54,7 +54,7 @@
 
 <script>
 import { ref, onMounted, watch } from 'vue'
-import { parseTime } from '@/utils/index.js'
+import { formatTime } from '@/utils/index.js'
 
 export default {
   name: 'Card',
@@ -72,7 +72,7 @@ export default {
     const firstImg = ref(null)
 
     const getTime = (timestamp) => {
-      return parseTime(timestamp, null)
+      return formatTime(timestamp, null)
     }
 
     const checkImgRadiusClass = (idx, len) => {

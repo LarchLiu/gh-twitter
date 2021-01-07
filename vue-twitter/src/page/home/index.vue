@@ -10,24 +10,26 @@
           >
             <template v-slot:btn>
               <span style="float: right">
+                <MinusOutlined v-if="ghToken" style="margin-right: 4px" @click="handleDelUsers"/>
                 <PlusOutlined v-if="ghToken" style="margin-right: 4px" @click="handleAddUsers" />
                 <SyncOutlined v-if="ghToken" style="margin-right: 4px" @click="actionScraper" />
-                <SettingFilled @click="visible = true"/>
+                <SettingFilled @click="tokenVisible = true"/>
                 <a-modal
-                  :visible="visible"
+                  :visible="tokenVisible"
                   title="Add Token"
                   ok-text="确认"
                   cancel-text="取消"
-                  @cancel="cancelInput"
+                  @cancel="cancelTokenInput"
                   @ok="setGHToken"
                 >
-                  <p>请输入具有 repo 权限的 github personal access token, 切勿泄露 token</p>
+                  <p>切勿泄露 token!</p>
+                  <p>请输入具有 repo 权限的 github personal access token, 设置 token 后可手动触发更新和增加删除用户列表.</p>
                   <!-- eslint-disable-next-line -->
                   <a-input v-model:value="inputToken" placeholder="github personal access token" />
                 </a-modal>
                 <a-modal
                   :visible="addUserVisible"
-                  title="Add Users"
+                  title="添加用户"
                   ok-text="确认"
                   cancel-text="取消"
                   @cancel="cancelUserInput"
@@ -36,6 +38,17 @@
                   <p>请输入用户名，添加多个用户以空格分割</p>
                   <!-- eslint-disable-next-line -->
                   <a-input v-model:value="inputUsers" placeholder="@username" />
+                </a-modal>
+                <a-modal
+                  :visible="delUserVisible"
+                  title="删除用户"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  @cancel="cancelUserSelect"
+                  @ok="delUsersAction"
+                >
+                  <!-- eslint-disable-next-line -->
+                  <a-checkbox-group v-model:value="delUserSelect" :options="delUserData" />
                 </a-modal>
               </span>
             </template>
@@ -94,18 +107,20 @@ import { Octokit } from '@octokit/core'
 import { arrToObj, uniqueArr } from '@/utils/index'
 import { message } from 'ant-design-vue'
 import {
+  MinusOutlined,
   PlusOutlined,
   SettingFilled,
   SyncOutlined
 } from '@ant-design/icons-vue'
 
 export default {
-  components: { AsideBox, PlusOutlined, SettingFilled, SyncOutlined, Twitter, FixedFooter },
+  components: { AsideBox, PlusOutlined, SettingFilled, SyncOutlined, Twitter, FixedFooter, MinusOutlined },
   setup () {
     const { ctx } = getCurrentInstance()
     const updateUser = ref([])
     const usersList = ref([])
     const usersData = ref({})
+    const delUserSelect = ref([])
     const usersListObj = ref({})
     const currentUser = ref('')
     const inputToken = ref('')
@@ -116,12 +131,19 @@ export default {
     const needUpdate = ref(false)
     const triggerUpdate = ref(false)
     const triggerChangeUsers = ref(false)
-    const visible = ref(false)
+    const tokenVisible = ref(false)
     const addUserVisible = ref(false)
+    const delUserVisible = ref(false)
     const store = useStore()
     const ghToken = computed(() => store.getters.gh_token)
     const repoUrl = process.env.VUE_APP_REPO_URL
     const pageSize = Number(process.env.VUE_APP_PAGE_SIZE)
+    const delUserData = computed(() => {
+      if (usersList.value.length > 0) {
+        return usersList.value.slice(1).map(item => { return item.Username })
+      }
+    })
+
     let timer
     let ghApi
 
@@ -148,10 +170,21 @@ export default {
         }).then(res => {
           triggerUpdate.value = true
           message.success({
-            content: '更新请求已发出，请等待3-4分钟',
+            content: '更新请求已发出，请等待响应',
             duration: 3
           })
         }).catch(err => {
+          if (err.status === 401) {
+            message.error({
+              content: `token 权限有误, ${err.status} ${err.message}`,
+              duration: 3
+            })
+          } else {
+            message.error({
+              content: `${err.status} ${err.message}`,
+              duration: 3
+            })
+          }
           console.log(err)
         })
       }
@@ -167,22 +200,33 @@ export default {
         triggerChangeUsers.value = true
         const content = type === 'addusers' ? '添加' : '删除'
         message.success({
-          content: content + '用户请求已发出，请等待3-4分钟',
+          content: content + '用户请求已发出，请等待响应',
           duration: 3
         })
       }).catch(err => {
+        if (err.status === 401) {
+          message.error({
+            content: `token 权限有误, ${err.status} ${err.message}`,
+            duration: 3
+          })
+        } else {
+          message.error({
+            content: `${err.status} ${err.message}`,
+            duration: 3
+          })
+        }
         console.log(err)
       })
     }
 
     const setGHToken = () => {
-      visible.value = false
+      tokenVisible.value = false
       store.dispatch('setGHToken', inputToken.value)
       inputToken.value = ''
     }
 
-    const cancelInput = () => {
-      visible.value = false
+    const cancelTokenInput = () => {
+      tokenVisible.value = false
       inputToken.value = ''
     }
 
@@ -202,6 +246,22 @@ export default {
       }
     }
 
+    const handleDelUsers = () => {
+      if (triggerUpdate.value) {
+        message.warning({
+          content: '更新请求未完毕，请耐心等待',
+          duration: 3
+        })
+      } else if (triggerChangeUsers.value) {
+        message.warning({
+          content: '更改用户请求未完毕，请耐心等待',
+          duration: 3
+        })
+      } else {
+        delUserVisible.value = true
+      }
+    }
+
     const addUsersAction = () => {
       addUserVisible.value = false
       const users = inputUsers.value.replace(/@/g, '').replace(/\s+/g, ',').replace(/^,*|,*$/g, '')
@@ -216,9 +276,28 @@ export default {
       inputUsers.value = ''
     }
 
+    const delUsersAction = () => {
+      delUserVisible.value = false
+      const users = delUserSelect.value.join(',')
+      if (users) {
+        actionChangeUsers('delusers', users)
+      } else {
+        message.warning({
+          content: '未选择用户',
+          duration: 3
+        })
+      }
+      delUserSelect.value = []
+    }
+
     const cancelUserInput = () => {
       addUserVisible.value = false
       inputUsers.value = ''
+    }
+
+    const cancelUserSelect = () => {
+      delUserVisible.value = false
+      delUserSelect.value = []
     }
 
     const dataInit = () => {
@@ -268,6 +347,9 @@ export default {
     }
 
     const getUserTweets = (user, page) => {
+      if (usersData.value[user]) {
+        usersData.value[user].Tweets = []
+      }
       twitterApi.getTweetsData(user, page).then(data => {
         usersData.value[user] = data
         updateUser.value.splice(updateUser.value.findIndex(e => e === user), 1)
@@ -354,14 +436,20 @@ export default {
       updateTime,
       ghToken,
       setGHToken,
-      visible,
+      tokenVisible,
       inputToken,
-      cancelInput,
+      cancelTokenInput,
       addUserVisible,
+      delUserVisible,
+      delUserData,
+      delUserSelect,
       inputUsers,
       addUsersAction,
       cancelUserInput,
       handleAddUsers,
+      handleDelUsers,
+      delUsersAction,
+      cancelUserSelect,
       pageSize,
       changePage,
       checkFixed
@@ -380,7 +468,6 @@ export default {
     }
 
     .bd {
-      margin-top: 2px;
       overflow: hidden;
       .aside-wrap {
         float: left;

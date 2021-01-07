@@ -12,6 +12,7 @@ import {
   Avatar,
   Badge,
   Button,
+  Checkbox,
   Input,
   Form,
   Modal,
@@ -30,6 +31,7 @@ app
   .use(Avatar)
   .use(Badge)
   .use(Button)
+  .use(Checkbox)
   .use(Input)
   .use(Form)
   .use(Modal)
