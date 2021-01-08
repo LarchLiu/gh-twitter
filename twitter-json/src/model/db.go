@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"twitter-json/src/utils"
 
 	"github.com/qiniu/qmgo"
@@ -29,12 +30,17 @@ func DbClose(cli *qmgo.Client) {
 }
 
 // DbCheckImageExist check file exsit.
-func DbCheckImageExist(coll *qmgo.Collection, key string) (exist bool, out string) {
-	cnt, _ := coll.Find(context.Background(), bson.M{"key": key}).Count()
-	if cnt > 0 {
-		return true, key
+func DbCheckImageExist(coll *qmgo.Collection, fileName string, user string) (exist bool, out string) {
+	one := utils.DbImage{}
+	filter := bson.M{"$and": bson.A{bson.M{"filename": fileName}, bson.M{"user": user}}}
+	err := coll.Find(context.Background(), filter).One(&one)
+	if err != nil {
+		fmt.Println(err)
 	}
-	return false, key
+	if one.Status == "success" {
+		return true, one.URL
+	}
+	return false, ""
 }
 
 // DbInsertImage insert image info to db.

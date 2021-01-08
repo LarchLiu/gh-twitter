@@ -25,7 +25,7 @@ type (
 	}
 	// Settings type default value is used by dev.
 	Settings struct {
-		PicBed       string `env:"PIC_BED" envDefault:"github"`                 // 图床: github, qiniu
+		PicBed       string `env:"PIC_BED" envDefault:"github"`                 // 图床: github, qiniu, smms
 		UseWebhook   bool   `env:"USE_WEBHOOK" envDefault:"false"`              // 是否用 webhook 触发 actions
 		DbInit       bool   `env:"DB_INIT" envDefault:"false"`                  // 数据库是否已初始化
 		PageSize     int64  `env:"PAGE_SIZE" envDefault:"10"`                   // 每页推特数量
@@ -33,8 +33,15 @@ type (
 	}
 	// DbImage image info in db
 	DbImage struct {
-		Key  string
-		User string
+		PicBed   string
+		FileName string
+		Key      string
+		User     string
+		URL      string
+		Type     string // tweet or profile
+		Idx      int    // tweet: index of photos  profile: 0 -> avatar 1 ->banner
+		Status   string // upload status: success or fail
+		TweetID  string // if Type is tweet use tweetid for upload fail
 	}
 	// UpdateInfo update info
 	UpdateInfo struct {

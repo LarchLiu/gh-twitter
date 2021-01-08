@@ -19,44 +19,75 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func checkImageExist(picBed string, coll *qmgo.Collection, user string, path string, name string) (exist bool, ret utils.DbImage, ghPath string) {
+func checkImageExist(picBed string, coll *qmgo.Collection, user string, path string, fileName string) (exist bool, url string, key string, ghPath string) {
 	pathReg := regexp.MustCompile(`(?s)twitter-json/raw(.*?)$`)
 	ghPath = "." + pathReg.FindStringSubmatch(path)[1]
-	ret = utils.DbImage{User: user}
-	if picBed == "qiniu" {
-		prefix := model.QiniuGetResourcePrefix()
-		joinKey := fmt.Sprintf("%s/%s/%s/%s", prefix, "images", user, name)
-		// 如果 prefix 为空需删除开头的 /
-		joinKey = strings.TrimPrefix(joinKey, "/")
-		e, key := model.DbCheckImageExist(coll, joinKey)
+	switch picBed {
+	case "qiniu":
+		e, u := model.DbCheckImageExist(coll, fileName, user)
 		exist = e
-		ret.Key = key
-	} else {
+		if e {
+			url = u
+		} else {
+			prefix := model.QiniuGetResourcePrefix()
+			key = fmt.Sprintf("%s/%s/%s/%s", prefix, "images", user, fileName)
+			// 如果 prefix 为空需删除开头的 /
+			key = strings.TrimPrefix(key, "/")
+		}
+	case "smms":
+		e, u := model.DbCheckImageExist(coll, fileName, user)
+		exist = e
+		if e {
+			url = u
+		} else {
+			key = fileName
+		}
+	default:
 		_, err := os.Stat(path)
 		if err == nil {
 			exist = true
 		} else {
 			exist = false
 		}
-		ret.Key = ghPath
+		url = ghPath
 	}
 
-	return exist, ret, ghPath
+	return exist, url, key, ghPath
 }
 
-func uploadImage(picBed string, coll *qmgo.Collection, user string, path string, key string) (ret utils.DbImage, err error) {
-	ret = utils.DbImage{Key: key, User: user}
-	if picBed == "qiniu" {
+func uploadImage(picBed string, coll *qmgo.Collection, path string, key string, dbImage utils.DbImage) (string, error) {
+	var url string = ""
+	var e error = nil
+	dbImage.PicBed = picBed
+	switch picBed {
+	case "qiniu":
 		retQiniu, err := model.QiniuUpload(path, key)
 		if err != nil {
-			return ret, err
+			dbImage.Status = "fail"
+			e = err
+		} else {
+			url = retQiniu.URL
+			dbImage.Key = key
+			dbImage.URL = url
+			dbImage.Status = "success"
+			os.Remove(path)
 		}
-		ret.Key = retQiniu.URL
-		os.Remove(path)
+	case "smms":
+		retSmms, err := model.SmmsUpload(path, key)
+		if err != nil {
+			dbImage.Status = "fail"
+			e = err
+		} else {
+			url = retSmms.URL
+			dbImage.Key = retSmms.Hash
+			dbImage.URL = url
+			dbImage.Status = "success"
+			os.Remove(path)
+		}
 	}
-	dbImg := utils.DbImage{Key: key, User: user}
-	model.DbInsertImage(coll, dbImg)
-	return ret, nil
+	fmt.Println(dbImage)
+	model.DbInsertImage(coll, dbImage)
+	return url, e
 }
 
 func uploadJSON(picBed string, path string, key string) (url string, err error) {
@@ -75,37 +106,30 @@ func uploadJSON(picBed string, path string, key string) (url string, err error) 
 	return url, nil
 }
 
-func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user string, src string) (htmlSrc string) {
+func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user string, src string, dbImage utils.DbImage) (htmlSrc string) {
 	localPath, fileName, err := utils.GetImageInfo(picDir+user, src)
 	if err != nil {
 		fmt.Println(err)
 	}
-	exit, ret, ghPath := checkImageExist(picBed, coll, user, localPath, fileName)
+	dbImage.FileName = fileName
+	exit, url, key, ghPath := checkImageExist(picBed, coll, user, localPath, fileName)
 	if exit {
-		if picBed == "github" {
-			htmlSrc = ret.Key
-		} else {
-			if picBed == "qiniu" {
-				htmlSrc = model.QiniuMakeURL(ret.Key)
-			} else {
-				htmlSrc = ret.Key
-			}
-		}
+		htmlSrc = url
 	} else {
 		err := utils.WriteImage(localPath, src)
 		if err != nil {
 			fmt.Println(err)
 		} else {
 			if picBed == "github" {
-				htmlSrc = ret.Key
-				fmt.Printf("filePath %s\n", ret.Key)
+				htmlSrc = ghPath
+				fmt.Printf("filePath %s\n", ghPath)
 			} else {
-				retUpload, err := uploadImage(picBed, coll, user, localPath, ret.Key)
+				url, err := uploadImage(picBed, coll, localPath, key, dbImage)
 				if err != nil {
 					// 上传失败用 github 资源
 					htmlSrc = ghPath
 				} else {
-					htmlSrc = retUpload.Key
+					htmlSrc = url
 				}
 			}
 		}
@@ -133,18 +157,18 @@ func jsonTwitterFromDB(coll *qmgo.Collection, picBed string, dir string, selUser
 			if err != nil {
 				fmt.Println(err)
 			}
-			fileName := fmt.Sprintf("%s%s%d%s", jsonUserDir, "/", i+1, ".json")
-			file, er := os.OpenFile(fileName, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+			filePath := fmt.Sprintf("%s%s%d%s", jsonUserDir, "/", i+1, ".json")
+			file, er := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 			defer func() { file.Close() }()
 			if er != nil && os.IsNotExist(er) {
-				file, err = os.Create(fileName)
+				file, err = os.Create(filePath)
 			}
 			_, err = file.Write(jsonBytes)
 			if err != nil {
 				fmt.Println(err)
 			}
 			key := fmt.Sprintf("%s/%d%s", selUser, i+1, ".json")
-			uploadJSON(picBed, fileName, key)
+			uploadJSON(picBed, filePath, key)
 		}
 	}
 }
@@ -228,7 +252,7 @@ func main() {
 	for _, user := range users {
 		var twitter utils.Twitter
 		var tweets []twitterscraper.Tweet
-		maxTweetsNbr := 50
+		maxTweetsNbr := 200
 		count := 0
 		one := utils.DbProfile{}
 		err := collProfile.Find(ctx, bson.M{"userinfo.username": user}).One(&one)
@@ -250,8 +274,9 @@ func main() {
 					}
 					if tweet.Tweet.Photos != nil && len(tweet.Tweet.Photos) > 0 {
 						var photos []string
-						for _, src := range tweet.Tweet.Photos {
-							htmlSrc := imageProcess(collImage, cfg.PicBed, picDir, user, src)
+						for i, src := range tweet.Tweet.Photos {
+							dbImage := utils.DbImage{Type: "tweet", TweetID: tweet.Tweet.ID, Idx: i, User: user}
+							htmlSrc := imageProcess(collImage, cfg.PicBed, picDir, user, src, dbImage)
 							photos = append(photos, htmlSrc)
 						}
 						tweet.Tweet.Photos = photos
@@ -290,7 +315,8 @@ func main() {
 					}
 				} else {
 					if profile.Avatar != "" {
-						profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar)
+						dbImage := utils.DbImage{Type: "profile", Idx: 0, User: user}
+						profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar, dbImage)
 					}
 					userInfo := utils.UserInfo{Avatar: profile.Avatar, Username: user, Name: profile.Name,
 						LastTweetTime: lastTweetTime, LastUpdateTime: time.Now().Unix(), TweetsCount: tweetsCnt, Pages: pages}

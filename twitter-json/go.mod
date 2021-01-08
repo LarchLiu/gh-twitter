@@ -8,5 +8,6 @@ require (
 	github.com/qiniu/api.v7/v7 v7.8.0
 	github.com/qiniu/qmgo v0.9.1
 	github.com/qiniu/x v1.11.5
+	github.com/sequix/smms-golang v0.0.0-20190913143201-ef11e1c00a4c
 	go.mongodb.org/mongo-driver v1.4.4
 )

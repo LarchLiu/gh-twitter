@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="w1210">
+    <div class="w820">
       <div class="bd">
         <div class="aside-wrap">
           <aside-box
@@ -462,7 +462,7 @@ export default {
     font-size: 12px;
     color: #666;
 
-    .w1210 {
+    .w820 {
       width: 820px;
       margin: 0 auto;
     }

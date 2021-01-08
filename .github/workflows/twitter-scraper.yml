@@ -1,7 +1,7 @@
 name: twitter scraper
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 0/4 * * *"
   repository_dispatch:
     types: [scraper, addusers, delusers]
   workflow_dispatch:
@@ -89,6 +89,7 @@ jobs:
           QINIU_DOMAIN: ${{ secrets.QINIU_DOMAIN }}
           QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
           QINIU_RESOURCE_PREFIX: ${{ secrets.QINIU_RESOURCE_PREFIX }}
+          SMMS_TOKEN: ${{ secrets.SMMS_TOKEN }}
 
       - name: Export mongodb
         run: |
