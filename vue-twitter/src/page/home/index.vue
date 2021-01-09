@@ -54,8 +54,10 @@
           <fixed-header id-name="twitter" :style-class-name="isMobile ? 'fixed-header-mobile' : 'fixed-header'">
             <div class="header">
               <span v-if="isMobile" style="margin-right: 10px">
-                <MenuFoldOutlined v-if="sidebarOpen" class="menu" @click="sidebarOpen=!sidebarOpen" />
-                <MenuUnfoldOutlined v-else class="menu" @click="sidebarOpen=!sidebarOpen" />
+                <a-badge :dot="needUpdate">
+                  <MenuFoldOutlined v-if="sidebarOpen" class="menu" @click="sidebarOpen=!sidebarOpen" />
+                  <MenuUnfoldOutlined v-else class="menu" @click="sidebarOpen=!sidebarOpen" />
+                </a-badge>
               </span>
               <span v-if="currentUser === usersList[0].Username" class="name">全部</span>
               <span v-else class="name">{{ usersData[currentUser].Profile.Name }}</span>
@@ -465,9 +467,17 @@ export default {
     watch(updateTime, () => {
       if (triggerUpdate.value) {
         triggerUpdate.value = false
+        message.success({
+          content: '更新请求已完毕',
+          duration: 3
+        })
       }
       if (triggerChangeUsers.value) {
         triggerChangeUsers.value = false
+        message.success({
+          content: '更改用户请求已完毕',
+          duration: 3
+        })
         getUserList()
       }
     })
