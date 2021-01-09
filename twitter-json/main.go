@@ -40,7 +40,7 @@ func checkImageExist(picBed string, coll *qmgo.Collection, user string, path str
 		if e {
 			url = u
 		} else {
-			key = fileName
+			key = fmt.Sprintf("%s_%s", user, fileName)
 		}
 	default:
 		_, err := os.Stat(path)

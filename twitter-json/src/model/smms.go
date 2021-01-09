@@ -20,3 +20,17 @@ func SmmsUpload(filePath string, fileName string) (*smms.ImageRsp, error) {
 	rsp, err := client.Upload(fileName, f)
 	return rsp, err
 }
+
+// SmmsHistory get history
+func SmmsHistory() ([]smms.ImageRsp, error) {
+	client := smms.NewFromToken(token)
+	rsp, err := client.History()
+	return rsp, err
+}
+
+// SmmsDelete delete image
+func SmmsDelete(hash string) error {
+	client := smms.NewFromToken(token)
+	err := client.Delete(hash)
+	return err
+}
