@@ -2,7 +2,7 @@ import API from '@/utils/request-api'
 import QiniuOctokit from '@/http/qiniu'
 
 const baseUrl = './twitter'
-const qiniuPrefix = process.env.VUE_APP_QINIU_RESOURCE_PREFIX.replace(/^\/*|\/*$/g, '')
+const qiniuPrefix = process.env.VUE_APP_QINIU_RESOURCE_PREFIX ? process.env.VUE_APP_QINIU_RESOURCE_PREFIX.replace(/^\/*|\/*$/g, '') : ''
 
 function getUsersData () {
   let jsonPath = '/json/userList.json'

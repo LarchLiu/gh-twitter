@@ -45,6 +45,10 @@
           />
         </div>
       </div>
+      <div style="font-size: 12px;text-align: center;padding: 5px">
+        <a v-if="!endPage" @click="loadMore">点击加载更多</a>
+        <span v-else style="color: #aba8b1;">已经到底了</span>
+      </div>
     </div>
   </div>
 </template>
@@ -79,11 +83,18 @@ export default {
     isMobile: {
       type: Boolean,
       default: false
+    },
+    endPage: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
     margeDetail (tweet, profile) {
       return { Avatar: profile.Avatar, Name: profile.Name, ...tweet }
+    },
+    loadMore () {
+      this.$emit('loadMore')
     }
   }
 }

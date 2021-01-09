@@ -19,7 +19,6 @@ import {
   Form,
   Menu,
   Modal,
-  Pagination,
   message
 } from 'ant-design-vue'
 // import 'ant-design-vue/dist/antd.css'
@@ -41,7 +40,6 @@ app
   .use(Input)
   .use(Form)
   .use(Modal)
-  .use(Pagination)
 
 // 插件注入
 app.use(router)

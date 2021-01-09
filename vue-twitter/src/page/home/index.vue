@@ -36,7 +36,6 @@
             :closable="false"
             :visible="sidebarOpen"
             :get-container="false"
-            :wrap-style="{ position: 'absolute' }"
             @close="sidebarOpen=false"
           >
             <p style="font-size: 12px; color: #aba8b1; text-align: center">{{ "更新时间: " + getTime(updateTime) }}</p>
@@ -97,22 +96,16 @@
             :detail="usersData[currentUser]"
             :usersObj="usersListObj"
             :isMobile="isMobile"
+            :endPage="curPage === usersData[currentUser].Pages"
+            @loadMore="getNextPage"
           />
           <twitter
             v-else
             :detail="usersData[currentUser]"
             :isMobile="isMobile"
+            :endPage="curPage === usersData[currentUser].Pages"
+            @loadMore="getNextPage"
           />
-          <fixed-footer :check-fixed="checkFixed" :width-self="true">
-            <div class="pagination">
-              <a-pagination
-                :current="curPage"
-                :total="usersListObj[currentUser].TweetsCount"
-                :pageSize="pageSize"
-                @change="changePage"
-              />
-            </div>
-          </fixed-footer>
         </div>
         <div v-else :class="isMobile ? 'tweets-mobile' : 'tweets'">
           <div class="header">
@@ -160,13 +153,12 @@
   </div>
 </template>
 <script>
-import { ref, getCurrentInstance, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, getCurrentInstance, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useStore } from 'vuex'
 import twitterApi from '@/api/twitter/index'
 import AsideBox from '@/components/AsideBox/index.vue'
 import Twitter from '@/components/Twitter/index.vue'
 import FixedHeader from '@/components/FixedHeader/index.vue'
-import FixedFooter from '@/components/FixedFooter/index.vue'
 import { Octokit } from '@octokit/core'
 import { arrToObj, uniqueArr, parseTime } from '@/utils/index'
 import { message } from 'ant-design-vue'
@@ -180,7 +172,7 @@ import {
 } from '@ant-design/icons-vue'
 
 export default {
-  components: { AsideBox, PlusOutlined, SettingFilled, SyncOutlined, Twitter, FixedHeader, FixedFooter, MinusOutlined, MenuFoldOutlined, MenuUnfoldOutlined },
+  components: { AsideBox, PlusOutlined, SettingFilled, SyncOutlined, Twitter, FixedHeader, MinusOutlined, MenuFoldOutlined, MenuUnfoldOutlined },
   setup () {
     const { ctx } = getCurrentInstance()
     const updateUser = ref([])
@@ -193,7 +185,6 @@ export default {
     const inputUsers = ref('')
     const curPage = ref(1)
     const updateTime = ref(0)
-    const checkFixed = ref(0)
     const needUpdate = ref(false)
     const triggerUpdate = ref(false)
     const triggerChangeUsers = ref(false)
@@ -205,7 +196,6 @@ export default {
     const ghToken = computed(() => store.getters.ghToken)
     const isMobile = computed(() => store.getters.isMobile)
     const repoUrl = process.env.VUE_APP_REPO_URL
-    const pageSize = Number(process.env.VUE_APP_PAGE_SIZE)
     const delUserData = computed(() => {
       if (usersList.value.length > 0) {
         return usersList.value.slice(1).map(item => { return item.Username })
@@ -415,18 +405,19 @@ export default {
     }
 
     const getUserTweets = (user, page) => {
-      if (usersData.value[user]) {
-        usersData.value[user].Tweets = []
-      }
       twitterApi.getTweetsData(user, page).then(data => {
-        usersData.value[user] = data
+        if (curPage.value === 1) {
+          usersData.value[user] = data
+        } else {
+          usersData.value[user].Tweets = usersData.value[user].Tweets.concat(data.Tweets)
+        }
         updateUser.value.splice(updateUser.value.findIndex(e => e === user), 1)
         if (updateUser.value.length === 0) {
           needUpdate.value = false
         }
-        nextTick(() => {
-          checkFixed.value++
-        })
+        // nextTick(() => {
+        //   checkFixed.value++
+        // })
       }).catch(err => {
         console.log(err)
       })
@@ -442,10 +433,8 @@ export default {
       getUserTweets(currentUser.value, curPage.value)
     }
 
-    const changePage = (page, pageSize) => {
-      curPage.value = page
-      document.body.scrollTop = document.documentElement.scrollTop = 0
-      // scrollTo(0, 0)
+    const getNextPage = () => {
+      curPage.value++
       getUserTweets(currentUser.value, curPage.value)
     }
 
@@ -524,12 +513,10 @@ export default {
       handleDelUsers,
       delUsersAction,
       cancelUserSelect,
-      pageSize,
-      changePage,
-      checkFixed,
       isMobile,
       getTime,
-      sidebarOpen
+      sidebarOpen,
+      getNextPage
     }
   }
 }
