@@ -1,6 +1,6 @@
 <template>
   <div class="aside">
-    <fixed-header v-if="needFixed" :id-name="idName" @change="handleFixedChange">
+    <fixed-header v-if="needFixed" :id-name="idName" style-class-name="fixed-header-aside" @change="handleFixedChange">
       <div class="aside-header" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
         <span style="font-size: 15px; font-weight: 800; border: 0 solid black;">{{ title }}</span>
         <slot name="btn" />
@@ -76,7 +76,7 @@ export default {
 <style lang="less" scoped>
   .aside {
     margin-bottom: 15px;
-    ::v-deep(.fixed-header) {
+    ::v-deep(.fixed-header-aside) {
       position:fixed;
       top:0;
       width: 210px;

@@ -13,8 +13,11 @@ import {
   Badge,
   Button,
   Checkbox,
+  Drawer,
+  Dropdown,
   Input,
   Form,
+  Menu,
   Modal,
   Pagination,
   message
@@ -32,6 +35,9 @@ app
   .use(Badge)
   .use(Button)
   .use(Checkbox)
+  .use(Drawer)
+  .use(Dropdown)
+  .use(Menu)
   .use(Input)
   .use(Form)
   .use(Modal)

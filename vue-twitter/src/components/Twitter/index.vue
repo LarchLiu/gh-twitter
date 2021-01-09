@@ -1,29 +1,5 @@
 <template>
   <div class="twitter">
-    <fixed-header :id-name="idName">
-      <div
-        v-if="Object.keys(detail).length > 0 && !isAll"
-        class="header"
-      >
-        <span style="font-size: 15px; font-weight: 800; border: 0 solid black; margin-right: 20px">{{ detail.Profile.Name }}</span>
-        <span style="font-weight: 700; color: rgb(15, 20, 25);">
-          {{ detail.TweetsCount }}
-        </span>
-        <span style="color: rgb(91, 112, 131); margin-right: 20px"> 推文</span>
-        <div class="floating">
-          <p style="color: rgb(91, 112, 131);">{{ "更新时间: " + getTime(updateTime) }}</p>
-        </div>
-      </div>
-      <div
-        v-else
-        class="header"
-      >
-        <span style="font-size: 15px; font-weight: 800; border: 0 solid black; margin-right: 20px">推文</span>
-        <div v-if="Object.keys(detail).length > 0 && isAll" class="floating">
-          <p style="color: rgb(91, 112, 131);">{{ "更新时间: " + getTime(updateTime) }}</p>
-        </div>
-      </div>
-    </fixed-header>
     <div
       v-if="Object.keys(detail).length > 0"
       class="content"
@@ -57,8 +33,16 @@
           v-for="(tweet, i) in detail.Tweets"
           :key="i"
         >
-          <card v-if="isAll && usersObj" :tweet="margeDetail(tweet, { Avatar: usersObj[tweet.Username].Avatar, Name: usersObj[tweet.Username].Name})" />
-          <card v-else :tweet="margeDetail(tweet, detail.Profile)" />
+          <card
+            v-if="isAll && usersObj"
+            :tweet="margeDetail(tweet, { Avatar: usersObj[tweet.Username].Avatar, Name: usersObj[tweet.Username].Name})"
+            :isMobile="isMobile"
+          />
+          <card
+            v-else
+            :tweet="margeDetail(tweet, detail.Profile)"
+            :isMobile="isMobile"
+          />
         </div>
       </div>
     </div>
@@ -66,13 +50,11 @@
 </template>
 
 <script>
-import FixedHeader from '@/components/FixedHeader/index.vue'
-import { parseTime } from '@/utils/index.js'
 import Card from './card.vue'
 
 export default {
   name: 'Twitter',
-  components: { Card, FixedHeader },
+  components: { Card },
   props: {
     idName: {
       type: String,
@@ -94,17 +76,14 @@ export default {
         return {}
       }
     },
-    updateTime: {
-      type: Number,
-      default: 0
+    isMobile: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
     margeDetail (tweet, profile) {
       return { Avatar: profile.Avatar, Name: profile.Name, ...tweet }
-    },
-    getTime (unix) {
-      return parseTime(unix)
     }
   }
 }
@@ -114,28 +93,7 @@ export default {
   .twitter {
     margin-bottom: 15px;
     color: rgba(0, 0, 0, 1.00);
-    ::v-deep(.fixed-header) {
-      position:fixed;
-      top:0;
-      width: 600px;
-      z-index:999;
-    }
-    .header {
-      padding: 10px;
-      background-color: #f7f7f7;
-      border: 1px solid #eee;
 
-      .floating {
-        display: table;
-        float: right;
-        height: 23px;
-      }
-      .floating p {
-        display: table-cell;
-        vertical-align: middle;
-        text-align: center;
-      }
-    }
     .content {
       border: 1px solid #eee;
       border-top: none;

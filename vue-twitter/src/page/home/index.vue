@@ -1,8 +1,8 @@
 <template>
   <div class="container">
-    <div class="w820">
+    <div :class="isMobile ? '' : 'w820'">
       <div class="bd">
-        <div class="aside-wrap">
+        <div class="aside-wrap" v-if="!isMobile">
           <aside-box
             title="GH Twitter"
             :need-fixed="true"
@@ -14,42 +14,6 @@
                 <PlusOutlined v-if="ghToken" style="margin-right: 4px" @click="handleAddUsers" />
                 <SyncOutlined v-if="ghToken" style="margin-right: 4px" @click="actionScraper" />
                 <SettingFilled @click="tokenVisible = true"/>
-                <a-modal
-                  :visible="tokenVisible"
-                  title="Add Token"
-                  ok-text="确认"
-                  cancel-text="取消"
-                  @cancel="cancelTokenInput"
-                  @ok="setGHToken"
-                >
-                  <p>切勿泄露 token!</p>
-                  <p>请输入具有 repo 权限的 github personal access token, 设置 token 后可手动触发更新和增加删除用户列表.</p>
-                  <!-- eslint-disable-next-line -->
-                  <a-input v-model:value="inputToken" placeholder="github personal access token" />
-                </a-modal>
-                <a-modal
-                  :visible="addUserVisible"
-                  title="添加用户"
-                  ok-text="确认"
-                  cancel-text="取消"
-                  @cancel="cancelUserInput"
-                  @ok="addUsersAction"
-                >
-                  <p>请输入用户名，添加多个用户以空格分割</p>
-                  <!-- eslint-disable-next-line -->
-                  <a-input v-model:value="inputUsers" placeholder="@username" />
-                </a-modal>
-                <a-modal
-                  :visible="delUserVisible"
-                  title="删除用户"
-                  ok-text="确认"
-                  cancel-text="取消"
-                  @cancel="cancelUserSelect"
-                  @ok="delUsersAction"
-                >
-                  <!-- eslint-disable-next-line -->
-                  <a-checkbox-group v-model:value="delUserSelect" :options="delUserData" />
-                </a-modal>
               </span>
             </template>
             <template v-slot:default v-if="usersList.length > 0">
@@ -65,18 +29,79 @@
             </template>
           </aside-box>
         </div>
-        <div v-if="usersList.length > 0 && usersData[currentUser]" class="tweets">
+        <div v-else>
+          <a-drawer
+            title="GH Twitter"
+            placement="left"
+            :closable="false"
+            :visible="sidebarOpen"
+            :get-container="false"
+            :wrap-style="{ position: 'absolute' }"
+            @close="sidebarOpen=false"
+          >
+            <p style="font-size: 12px; color: #aba8b1; text-align: center">{{ "更新时间: " + getTime(updateTime) }}</p>
+            <div
+              v-for="(user, i) in usersList"
+              :key="i"
+              @click="changeUser(i)"
+            >
+              <a-badge :dot="needUpdate && (updateUser.findIndex(e => e === user.Username) >= 0)">
+                <a :class="user.Username === currentUser ? 'current' : 'normal'">{{ user.Name ? user.Name : user.Username }}</a>
+              </a-badge>
+            </div>
+          </a-drawer>
+        </div>
+        <div v-if="usersList.length > 0 && usersData[currentUser]" :class="isMobile ? 'tweets-mobile' : 'tweets'">
+          <fixed-header id-name="twitter" :style-class-name="isMobile ? 'fixed-header-mobile' : 'fixed-header'">
+            <div class="header">
+              <span v-if="isMobile" style="margin-right: 10px">
+                <MenuFoldOutlined v-if="sidebarOpen" class="menu" @click="sidebarOpen=!sidebarOpen" />
+                <MenuUnfoldOutlined v-else class="menu" @click="sidebarOpen=!sidebarOpen" />
+              </span>
+              <span v-if="currentUser === usersList[0].Username" class="name">全部</span>
+              <span v-else class="name">{{ usersData[currentUser].Profile.Name }}</span>
+              <span style="font-weight: 700; color: rgb(15, 20, 25);">
+                {{ usersData[currentUser].TweetsCount }}
+              </span>
+              <span style="color: rgb(91, 112, 131); margin-right: 20px"> 推文</span>
+              <span v-if="isMobile" class="floating">
+                <a-dropdown :trigger="['click']">
+                  <span @click="e => e.preventDefault()"><SettingFilled style="font-size: 20px;" /></span>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item v-if="ghToken" key="0">
+                        <a @click="actionScraper">更新数据</a>
+                      </a-menu-item>
+                      <a-menu-item v-if="ghToken" key="1">
+                        <a @click="handleAddUsers">添加用户</a>
+                      </a-menu-item>
+                      <a-menu-item v-if="ghToken" key="2">
+                        <a @click="handleDelUsers">删除用户</a>
+                      </a-menu-item>
+                      <a-menu-divider v-if="ghToken" />
+                      <a-menu-item key="3">
+                        <a @click="tokenVisible = true">设置 Token</a>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </span>
+              <div v-else class="floating">
+                <p style="color: rgb(91, 112, 131);">{{ "更新时间: " + getTime(updateTime) }}</p>
+              </div>
+            </div>
+          </fixed-header>
           <twitter
             v-if="currentUser === usersList[0].Username"
-            :updateTime="updateTime"
             :isAll="true"
             :detail="usersData[currentUser]"
             :usersObj="usersListObj"
+            :isMobile="isMobile"
           />
           <twitter
             v-else
-            :updateTime="updateTime"
             :detail="usersData[currentUser]"
+            :isMobile="isMobile"
           />
           <fixed-footer :check-fixed="checkFixed" :width-self="true">
             <div class="pagination">
@@ -89,10 +114,48 @@
             </div>
           </fixed-footer>
         </div>
-        <div v-else class="tweets">
-          <twitter />
+        <div v-else :class="isMobile ? 'tweets-mobile' : 'tweets'">
+          <div class="header">
+            <span class="name">推文</span>
+          </div>
         </div>
       </div>
+      <a-modal
+        :visible="tokenVisible"
+        title="Add Token"
+        ok-text="确认"
+        cancel-text="取消"
+        @cancel="cancelTokenInput"
+        @ok="setGHToken"
+      >
+        <p>切勿泄露 token!</p>
+        <p>请输入具有 repo 权限的 github personal access token, 设置 token 后可手动触发更新和增加删除用户列表.</p>
+        <!-- eslint-disable-next-line -->
+        <a-input v-model:value="inputToken" placeholder="github personal access token" />
+      </a-modal>
+      <a-modal
+        :visible="addUserVisible"
+        title="添加用户"
+        ok-text="确认"
+        cancel-text="取消"
+        @cancel="cancelUserInput"
+        @ok="addUsersAction"
+      >
+        <p>请输入用户名，添加多个用户以空格分割</p>
+        <!-- eslint-disable-next-line -->
+        <a-input v-model:value="inputUsers" placeholder="@username" />
+      </a-modal>
+      <a-modal
+        :visible="delUserVisible"
+        title="删除用户"
+        ok-text="确认"
+        cancel-text="取消"
+        @cancel="cancelUserSelect"
+        @ok="delUsersAction"
+      >
+        <!-- eslint-disable-next-line -->
+        <a-checkbox-group v-model:value="delUserSelect" :options="delUserData" />
+      </a-modal>
     </div>
   </div>
 </template>
@@ -102,19 +165,22 @@ import { useStore } from 'vuex'
 import twitterApi from '@/api/twitter/index'
 import AsideBox from '@/components/AsideBox/index.vue'
 import Twitter from '@/components/Twitter/index.vue'
+import FixedHeader from '@/components/FixedHeader/index.vue'
 import FixedFooter from '@/components/FixedFooter/index.vue'
 import { Octokit } from '@octokit/core'
-import { arrToObj, uniqueArr } from '@/utils/index'
+import { arrToObj, uniqueArr, parseTime } from '@/utils/index'
 import { message } from 'ant-design-vue'
 import {
   MinusOutlined,
   PlusOutlined,
   SettingFilled,
-  SyncOutlined
+  SyncOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined
 } from '@ant-design/icons-vue'
 
 export default {
-  components: { AsideBox, PlusOutlined, SettingFilled, SyncOutlined, Twitter, FixedFooter, MinusOutlined },
+  components: { AsideBox, PlusOutlined, SettingFilled, SyncOutlined, Twitter, FixedHeader, FixedFooter, MinusOutlined, MenuFoldOutlined, MenuUnfoldOutlined },
   setup () {
     const { ctx } = getCurrentInstance()
     const updateUser = ref([])
@@ -134,8 +200,10 @@ export default {
     const tokenVisible = ref(false)
     const addUserVisible = ref(false)
     const delUserVisible = ref(false)
+    const sidebarOpen = ref(false)
     const store = useStore()
-    const ghToken = computed(() => store.getters.gh_token)
+    const ghToken = computed(() => store.getters.ghToken)
+    const isMobile = computed(() => store.getters.isMobile)
     const repoUrl = process.env.VUE_APP_REPO_URL
     const pageSize = Number(process.env.VUE_APP_PAGE_SIZE)
     const delUserData = computed(() => {
@@ -368,7 +436,9 @@ export default {
       currentUser.value = usersList.value[i].Username
       curPage.value = 1
       document.body.scrollTop = document.documentElement.scrollTop = 0
-      // scrollTo(0, 0)
+      if (sidebarOpen.value) {
+        sidebarOpen.value = false
+      }
       getUserTweets(currentUser.value, curPage.value)
     }
 
@@ -381,6 +451,10 @@ export default {
 
     const margeDetail = (tweet, profile) => {
       return { Avatar: profile.Avatar, Name: profile.Name, ...tweet }
+    }
+
+    const getTime = (unix) => {
+      return parseTime(unix)
     }
 
     onMounted(() => {
@@ -452,7 +526,10 @@ export default {
       cancelUserSelect,
       pageSize,
       changePage,
-      checkFixed
+      checkFixed,
+      isMobile,
+      getTime,
+      sidebarOpen
     }
   }
 }
@@ -475,30 +552,89 @@ export default {
         font-size: 15px;
         font-weight: 500;
         margin-bottom: 20px;
-        :deep(.current) {
-          color: rgb(29, 161, 242);
-        }
-        :deep(.normal) {
-          color: black;
-        }
       }
-      .tweets {
-        float: right;
-        width: 600px;
-        min-height: 220px;
+
+      .tweets-body() {
+        .header {
+          padding: 10px;
+          background-color: #f7f7f7;
+          border: 1px solid #eee;
+
+          .menu {
+            font-size: 20px;
+          }
+          .name {
+            font-size: 15px;
+            font-weight: 800;
+            border: 0 solid black;
+            margin-right: 10px
+          }
+          .floating {
+            display: table;
+            float: right;
+            height: 23px;
+          }
+          .floating p {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+          }
+        }
 
         .pagination {
           text-align: center;
           padding: 4px 0;
         }
+      }
 
-        :deep(.fixed-footer) {
-          position:fixed;
-          bottom:0;
-          z-index:999;
-          border: 1px solid #eee;
-          background-color:#f7f7f7ee;
-        }
+      .tweets {
+        float: right;
+        width: 600px;
+        min-height: 220px;
+
+        .tweets-body()
+      }
+
+      .tweets-mobile {
+        width: 100%;
+        min-height: 220px;
+
+        .tweets-body()
+      }
+
+      :deep(.current) {
+        color: rgb(29, 161, 242);
+      }
+      :deep(.normal) {
+        color: black;
+      }
+      :deep(.fixed-header) {
+        position:fixed;
+        top:0;
+        width: 600px;
+        z-index:999;
+      }
+      :deep(.fixed-header-mobile) {
+        position:fixed;
+        top:0;
+        width: 100%;
+        z-index:999;
+      }
+      :deep(.fixed-footer) {
+        position:fixed;
+        bottom:0;
+        z-index:999;
+        border: 1px solid #eee;
+        background-color:#f7f7f7ee;
+      }
+      :deep(.ant-drawer-header) {
+        padding: 11px 10px
+      }
+      :deep(.ant-drawer-body) {
+        padding: 10px;
+      }
+      :deep(.ant-divider-horizontal.ant-divider-with-text-center) {
+          margin: 5px 0;
       }
     }
   }

@@ -4,13 +4,65 @@
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
-    <div class="head">
+    <div v-if="isMobile" class="body-mobile">
+      <div id="header">
+        <a-avatar
+          class="avatar"
+          :size="46"
+          :src="tweet.Avatar"
+        />
+        <span id="name">
+          <span style="font-weight: 700; border: 0 solid black; margin-right: 10px">{{ tweet.Name }}</span>
+          <span v-if="tweet.IsRetweet">转推 </span>
+          <span style="font-weight: 400; color: rgb(91, 112, 131);">
+            {{ '@' + tweet.Username }}
+          </span>
+        </span>
+        <div>
+          <span style="font-weight: 400; color: rgb(91, 112, 131);">
+            {{ getTime(tweet.Timestamp) }}
+          </span>
+        </div>
+      </div>
+      <div ref="detail" class="detail">
+        <div class="text">
+          <span v-html="tweet.HTML" />
+        </div>
+        <div
+          v-if="tweet.Photos && tweet.Photos.length > 0"
+          class="image"
+        >
+          <a
+            v-for="(img, i) in tweet.Photos"
+            :key="i"
+            :class="checkImgRadiusClass(i, tweet.Photos.length)"
+          >
+            <img
+              v-if="imgHeight"
+              :src="img"
+              :width="checkImgWidth(i, tweet.Photos.length)"
+              :height="imgHeight"
+              :class="checkImgClass(i, tweet.Photos.length)"
+            >
+            <img
+              v-else
+              :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : 'otherImg'"
+              :src="img"
+              :width="checkImgWidth(i, tweet.Photos.length)"
+              :class="checkImgClass(i, tweet.Photos.length)"
+              :onload="imgOnload"
+            >
+          </a>
+        </div>
+      </div>
+    </div>
+    <div v-else class="body">
       <a-avatar
         class="avatar"
         :size="50"
         :src="tweet.Avatar"
       />
-      <div class="detail">
+      <div ref="detail" class="detail">
         <div id="name">
           <span style="font-weight: 700; border: 0 solid black; margin-right: 10px">{{ tweet.Name }}</span>
           <span v-if="tweet.IsRetweet">转推 </span>
@@ -64,12 +116,18 @@ export default {
       default () {
         return {}
       }
+    },
+    isMobile: {
+      type: Boolean,
+      default: false
     }
   },
   setup (props) {
     const mouseEnter = ref(false)
     const imgHeight = ref(0)
     const firstImg = ref(null)
+    const detail = ref(null)
+    const detailWidth = ref(0)
 
     const getTime = (timestamp) => {
       return formatTime(timestamp, null)
@@ -116,7 +174,7 @@ export default {
         }
       }
       idx++
-      if (idx % 2) {
+      if (idx % 2 && len > 1) {
         className.push('mg-right')
       }
       if (len > 2) {
@@ -127,9 +185,9 @@ export default {
 
     const checkImgWidth = (idx, len) => {
       if (len % 2 && idx === len - 1) {
-        return 500
+        return detailWidth.value
       } else {
-        return (500 - (len > 1 ? 2 : 0)) / (len > 2 ? 2 : len)
+        return (detailWidth.value - (len > 1 ? 2 : 0)) / (len > 2 ? 2 : len)
       }
     }
 
@@ -165,6 +223,12 @@ export default {
       imgHeight.value = 0
     })
 
+    watch(detail, () => {
+      if (detail.value) {
+        detailWidth.value = detail.value.clientWidth
+      }
+    })
+
     return {
       getTime,
       mouseEnter,
@@ -175,7 +239,9 @@ export default {
       checkImgWidth,
       imgOnload,
       imgHeight,
-      firstImg
+      firstImg,
+      detail,
+      detailWidth
     }
   }
 }
@@ -189,7 +255,55 @@ export default {
     text-align: left;
     font-size: 15px;
 
-    .head {
+    .detail-info() {
+      .image {
+        margin-top: 10px;
+
+        .lt-radius {
+          img {
+            border-top-left-radius: 10px;
+          }
+        }
+        .lb-radius {
+          img {
+            border-bottom-left-radius: 10px;
+          }
+        }
+        .rt-radius {
+          img {
+            border-top-right-radius: 10px;
+          }
+        }
+        .rb-radius {
+          img {
+            border-bottom-right-radius: 10px;
+          }
+        }
+        .mg-right {
+          margin-right: 2px;
+        }
+        .mg-bottom {
+          margin-bottom: 2px;
+        }
+        .fit-contain {
+          object-fit: cover;
+        }
+      }
+      .text {
+        :deep(.Emoji) {
+          width: 18px;
+          height: 18px;
+        }
+        :deep(.PrettyLink-value) {
+          color: rgb(27, 149, 224);
+        }
+        :deep(.PrettyLink-prefix) {
+          color: rgb(27, 149, 224);
+        }
+      }
+    }
+
+    .body {
       overflow: hidden;
 
       .avatar {
@@ -200,50 +314,22 @@ export default {
         float: right;
         width: 500px;
 
-        .image {
-          margin-top: 10px;
-          .lt-radius {
-            img {
-              border-top-left-radius: 10px;
-            }
-          }
-          .lb-radius {
-            img {
-              border-bottom-left-radius: 10px;
-            }
-          }
-          .rt-radius {
-            img {
-              border-top-right-radius: 10px;
-            }
-          }
-          .rb-radius {
-            img {
-              border-bottom-right-radius: 10px;
-            }
-          }
-          .mg-right {
-            margin-right: 2px;
-          }
-          .mg-bottom {
-            margin-bottom: 2px;
-          }
-          .fit-contain {
-            object-fit: cover;
-          }
-        }
-        .text {
-          :deep(.Emoji) {
-            width: 18px;
-            height: 18px;
-          }
-          :deep(.PrettyLink-value) {
-            color: rgb(27, 149, 224);
-          }
-          :deep(.PrettyLink-prefix) {
-            color: rgb(27, 149, 224);
-          }
-        }
+        .detail-info()
+      }
+    }
+
+    .body-mobile {
+      overflow: hidden;
+
+      .avatar {
+        width: 46px;
+        float: left;
+        margin-right: 10px;
+      }
+      .detail {
+        margin-top: 10px;
+
+        .detail-info()
       }
     }
   }
