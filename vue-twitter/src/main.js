@@ -21,6 +21,8 @@ import {
   Modal,
   message
 } from 'ant-design-vue'
+
+import './registerServiceWorker'
 // import 'ant-design-vue/dist/antd.css'
 
 const app = createApp(App)

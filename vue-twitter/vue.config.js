@@ -96,5 +96,18 @@ module.exports = {
       },
     }
   },
-  productionSourceMap: false
+  productionSourceMap: false,
+  pwa: {
+    name: "name",
+    themeColor: "#4c89fe",
+    msTileColor: "#4c89fe",
+    manifestOptions: {
+      start_url: ".",
+      background_color: "#4c89fe"
+    },
+    workboxPluginMode: "GenerateSW",
+    workboxOptions: {
+      exclude: [/\.(?:json)$/], //在预缓存中排除 json
+    }
+  }
 }
