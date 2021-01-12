@@ -392,7 +392,7 @@ export default {
         }
       }).catch(e => {
         console.log(e)
-        usersList.value = []
+        // usersList.value = []
       })
     }
 

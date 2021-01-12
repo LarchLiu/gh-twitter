@@ -98,7 +98,7 @@ module.exports = {
   },
   productionSourceMap: false,
   pwa: {
-    name: "name",
+    name: name,
     themeColor: "#4c89fe",
     msTileColor: "#4c89fe",
     manifestOptions: {
