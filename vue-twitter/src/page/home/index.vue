@@ -402,7 +402,7 @@ export default {
         usersListObj.value = arrToObj(res, 'Username')
       }).catch(e => {
         console.log(e)
-        usersList.value = []
+        // usersList.value = []
       })
     }
 
