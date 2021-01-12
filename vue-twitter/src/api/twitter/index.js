@@ -5,9 +5,9 @@ const baseUrl = './twitter'
 const qiniuPrefix = process.env.VUE_APP_QINIU_RESOURCE_PREFIX ? process.env.VUE_APP_QINIU_RESOURCE_PREFIX.replace(/^\/*|\/*$/g, '') : ''
 
 function getUsersData () {
-  let jsonPath = '/json/userList.json'
+  const jsonPath = '/json/userList.json?v=' + (new Date()).getTime()
   if (process.env.VUE_APP_PIC_BED === 'qiniu') {
-    jsonPath += '?v=' + (new Date()).getTime()
+    // jsonPath += '?v=' + (new Date()).getTime()
     return new Promise((resolve, reject) => {
       const path = (qiniuPrefix + jsonPath).replace(/^\/*|\/*$/g, '')
       QiniuOctokit.request('GET /' + path).then(response => {
@@ -23,9 +23,9 @@ function getUsersData () {
 }
 
 function getTweetsData (user, page) {
-  let jsonPath = '/json/' + user + '/' + page + '.json'
+  const jsonPath = '/json/' + user + '/' + page + '.json?v=' + (new Date()).getTime()
   if (process.env.VUE_APP_PIC_BED === 'qiniu') {
-    jsonPath += '?v=' + (new Date()).getTime()
+    // jsonPath += '?v=' + (new Date()).getTime()
     return new Promise((resolve, reject) => {
       const path = (qiniuPrefix + jsonPath).replace(/^\/*|\/*$/g, '')
       QiniuOctokit.request('GET /' + path).then(response => {
@@ -41,9 +41,9 @@ function getTweetsData (user, page) {
 }
 
 function getUpdateInfo () {
-  let jsonPath = '/json/updateInfo.json'
+  const jsonPath = '/json/updateInfo.json?v=' + (new Date()).getTime()
   if (process.env.VUE_APP_PIC_BED === 'qiniu') {
-    jsonPath += '?v=' + (new Date()).getTime()
+    // jsonPath += '?v=' + (new Date()).getTime()
     return new Promise((resolve, reject) => {
       const path = (qiniuPrefix + jsonPath).replace(/^\/*|\/*$/g, '')
       QiniuOctokit.request('GET /' + path).then(response => {

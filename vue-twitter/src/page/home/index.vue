@@ -413,7 +413,10 @@ export default {
         } else {
           usersData.value[user].Tweets = usersData.value[user].Tweets.concat(data.Tweets)
         }
-        updateUser.value.splice(updateUser.value.findIndex(e => e === user), 1)
+        const idx = updateUser.value.findIndex(e => e === user)
+        if (idx >= 0) {
+          updateUser.value.splice(idx, 1)
+        }
         if (updateUser.value.length === 0) {
           needUpdate.value = false
         }
