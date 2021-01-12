@@ -64,7 +64,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/img/icons/safari-pinned-tab.svg"
   },
   {
-    "revision": "ba5155a4fab73710ec252974180d62bc",
+    "revision": "da4c024663b516fd64f72dac2428fac1",
     "url": "/gh-twitter/index.html"
   },
   {
@@ -72,12 +72,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/robots.txt"
   },
   {
-    "revision": "d320110c2fa925a6824c",
+    "revision": "3b08f8cd85efe2736421",
     "url": "/gh-twitter/static/css/app.cb8f91c0.css"
   },
   {
-    "revision": "8408d73ffa3b6d21b5da",
-    "url": "/gh-twitter/static/css/chunk-42bdaf4a.d09665d1.css"
+    "revision": "2418c1e7bc8ce96108fd",
+    "url": "/gh-twitter/static/css/chunk-4160ed25.b52c5336.css"
   },
   {
     "revision": "eea7b2c3a48941616021",
@@ -88,16 +88,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/static/css/chunk-antdv.b50b2b7c.css"
   },
   {
-    "revision": "d320110c2fa925a6824c",
-    "url": "/gh-twitter/static/js/app.9f45e519.js"
+    "revision": "3b08f8cd85efe2736421",
+    "url": "/gh-twitter/static/js/app.fbbf0f49.js"
   },
   {
     "revision": "99e65bdf7502429097c4",
     "url": "/gh-twitter/static/js/chunk-2d0a2d66.9635cc38.js"
   },
   {
-    "revision": "8408d73ffa3b6d21b5da",
-    "url": "/gh-twitter/static/js/chunk-42bdaf4a.a018226c.js"
+    "revision": "2418c1e7bc8ce96108fd",
+    "url": "/gh-twitter/static/js/chunk-4160ed25.d5f34981.js"
   },
   {
     "revision": "fc0e0d1dd7ea22f0ea17",
@@ -116,7 +116,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/static/js/chunk-libs.d62e8ea4.js"
   },
   {
-    "revision": "dc9f3777a75ee5b61ec9",
-    "url": "/gh-twitter/static/js/runtime.db4a9705.js"
+    "revision": "113e4e996734b0296731",
+    "url": "/gh-twitter/static/js/runtime.da78ec6a.js"
   }
 ]);
