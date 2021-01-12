@@ -64,7 +64,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/img/icons/safari-pinned-tab.svg"
   },
   {
-    "revision": "da4c024663b516fd64f72dac2428fac1",
+    "revision": "c28b6b9454e37bea23017399336db2c9",
     "url": "/gh-twitter/index.html"
   },
   {
@@ -72,12 +72,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/robots.txt"
   },
   {
-    "revision": "3b08f8cd85efe2736421",
+    "revision": "74fb69be3fc76047ace8",
     "url": "/gh-twitter/static/css/app.cb8f91c0.css"
-  },
-  {
-    "revision": "2418c1e7bc8ce96108fd",
-    "url": "/gh-twitter/static/css/chunk-4160ed25.b52c5336.css"
   },
   {
     "revision": "eea7b2c3a48941616021",
@@ -88,16 +84,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/static/css/chunk-antdv.b50b2b7c.css"
   },
   {
-    "revision": "3b08f8cd85efe2736421",
-    "url": "/gh-twitter/static/js/app.fbbf0f49.js"
+    "revision": "afd950e3c66509629e4b",
+    "url": "/gh-twitter/static/css/chunk-d71d289c.63f4f75b.css"
+  },
+  {
+    "revision": "74fb69be3fc76047ace8",
+    "url": "/gh-twitter/static/js/app.5c0b83d1.js"
   },
   {
     "revision": "99e65bdf7502429097c4",
     "url": "/gh-twitter/static/js/chunk-2d0a2d66.9635cc38.js"
-  },
-  {
-    "revision": "2418c1e7bc8ce96108fd",
-    "url": "/gh-twitter/static/js/chunk-4160ed25.d5f34981.js"
   },
   {
     "revision": "fc0e0d1dd7ea22f0ea17",
@@ -112,11 +108,15 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/static/js/chunk-antdv.b4094a15.js"
   },
   {
+    "revision": "afd950e3c66509629e4b",
+    "url": "/gh-twitter/static/js/chunk-d71d289c.fdcc6254.js"
+  },
+  {
     "revision": "8a4386106a15f6169e0d",
     "url": "/gh-twitter/static/js/chunk-libs.d62e8ea4.js"
   },
   {
-    "revision": "113e4e996734b0296731",
-    "url": "/gh-twitter/static/js/runtime.da78ec6a.js"
+    "revision": "5a04951e6cf00db129ce",
+    "url": "/gh-twitter/static/js/runtime.5c9cc26b.js"
   }
 ]);
