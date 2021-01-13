@@ -47,3 +47,8 @@ func DbCheckImageExist(coll *qmgo.Collection, fileName string, user string) (exi
 func DbInsertImage(coll *qmgo.Collection, img utils.DbImage) {
 	coll.InsertOne(context.Background(), img)
 }
+
+// DbUpdateImage update image info to db
+func DbUpdateImage(coll *qmgo.Collection, img utils.DbImage) {
+	coll.UpdateOne(context.Background(), bson.M{"$and": bson.A{bson.M{"filename": img.FileName}, bson.M{"user": img.User}}}, img)
+}

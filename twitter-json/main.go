@@ -55,7 +55,7 @@ func checkImageExist(picBed string, coll *qmgo.Collection, user string, path str
 	return exist, url, key, ghPath
 }
 
-func uploadImage(picBed string, coll *qmgo.Collection, path string, key string, dbImage utils.DbImage) (string, error) {
+func uploadImage(picBed string, coll *qmgo.Collection, path string, key string, dbImage utils.DbImage, reUpload bool) (string, error) {
 	var url string = ""
 	var e error = nil
 	dbImage.PicBed = picBed
@@ -86,7 +86,11 @@ func uploadImage(picBed string, coll *qmgo.Collection, path string, key string, 
 		}
 	}
 	fmt.Println(dbImage)
-	model.DbInsertImage(coll, dbImage)
+	if reUpload {
+		model.DbUpdateImage(coll, dbImage)
+	} else {
+		model.DbInsertImage(coll, dbImage)
+	}
 	return url, e
 }
 
@@ -124,7 +128,7 @@ func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user stri
 				htmlSrc = ghPath
 				fmt.Printf("filePath %s\n", ghPath)
 			} else {
-				url, err := uploadImage(picBed, coll, localPath, key, dbImage)
+				url, err := uploadImage(picBed, coll, localPath, key, dbImage, false)
 				if err != nil {
 					// 上传失败用 github 资源
 					htmlSrc = ghPath
@@ -135,6 +139,46 @@ func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user stri
 		}
 	}
 	return htmlSrc
+}
+
+func failImageProcess(coll *qmgo.Collection, imgDir string, user string, picBed string) bool {
+	var imageChange bool = false
+	dbImages := []utils.DbImage{}
+	filter := bson.M{"$and": bson.A{bson.M{"status": "fail"}, bson.M{"user": user}}}
+
+	coll.Find(context.Background(), filter).All(&dbImages)
+	if len(dbImages) > 0 {
+		for _, img := range dbImages {
+			filePath := path.Join(imgDir+user, img.FileName)
+			exist := false
+			_, err := os.Stat(filePath)
+			if err == nil {
+				exist = true
+			} else {
+				exist = false
+			}
+			if exist {
+				key := ""
+				switch picBed {
+				case "qiniu":
+					key = img.Key
+				case "smms":
+					key = fmt.Sprintf("%s_%s", user, img.FileName)
+				}
+				_, err := uploadImage(picBed, coll, filePath, key, img, true)
+				if err != nil {
+					// 上传失败
+					imageChange = imageChange || false
+				} else {
+					imageChange = imageChange || true
+				}
+			} else {
+				imageChange = imageChange || false
+			}
+		}
+
+	}
+	return imageChange
 }
 
 func jsonTwitterFromDB(coll *qmgo.Collection, picBed string, dir string, selUser string, count int64, pageSize int64, twitter utils.Twitter) {
@@ -250,6 +294,7 @@ func main() {
 	isUpdate := false
 	updateUsers := []string{}
 	for _, user := range users {
+		imgChange := failImageProcess(collImage, picDir, user, cfg.PicBed)
 		var twitter utils.Twitter
 		var tweets []twitterscraper.Tweet
 		maxTweetsNbr := 200
@@ -289,12 +334,14 @@ func main() {
 				}
 			}
 
-			if count > 0 {
+			if imgChange || count > 0 {
 				isUpdate = true
 				updateUsers = append(updateUsers, user)
 				lastTweetTime = curLastTweetTime
 
-				collTweet.InsertMany(ctx, tweets)
+				if count > 0 {
+					collTweet.InsertMany(ctx, tweets)
+				}
 
 				// get user tweets count
 				tweetsCnt, err := collTweet.Find(ctx, bson.M{"username": user}).Count()
