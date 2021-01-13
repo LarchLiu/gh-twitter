@@ -50,5 +50,12 @@ func DbInsertImage(coll *qmgo.Collection, img utils.DbImage) {
 
 // DbUpdateImage update image info to db
 func DbUpdateImage(coll *qmgo.Collection, img utils.DbImage) {
-	coll.UpdateOne(context.Background(), bson.M{"$and": bson.A{bson.M{"filename": img.FileName}, bson.M{"user": img.User}}}, img)
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "key", Value: img.Key},
+			{Key: "url", Value: img.URL},
+			{Key: "status", Value: img.Status},
+		}},
+	}
+	coll.UpdateOne(context.Background(), bson.M{"$and": bson.A{bson.M{"filename": img.FileName}, bson.M{"user": img.User}}}, update)
 }

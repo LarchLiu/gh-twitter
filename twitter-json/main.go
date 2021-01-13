@@ -141,12 +141,12 @@ func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user stri
 	return htmlSrc
 }
 
-func failImageProcess(coll *qmgo.Collection, imgDir string, user string, picBed string) bool {
+func failImageProcess(collImage *qmgo.Collection, collTweet *qmgo.Collection, collProfile *qmgo.Collection, imgDir string, user string, picBed string) bool {
 	var imageChange bool = false
 	dbImages := []utils.DbImage{}
 	filter := bson.M{"$and": bson.A{bson.M{"status": "fail"}, bson.M{"user": user}}}
 
-	coll.Find(context.Background(), filter).All(&dbImages)
+	collImage.Find(context.Background(), filter).All(&dbImages)
 	if len(dbImages) > 0 {
 		for _, img := range dbImages {
 			filePath := path.Join(imgDir+user, img.FileName)
@@ -165,12 +165,58 @@ func failImageProcess(coll *qmgo.Collection, imgDir string, user string, picBed 
 				case "smms":
 					key = fmt.Sprintf("%s_%s", user, img.FileName)
 				}
-				_, err := uploadImage(picBed, coll, filePath, key, img, true)
+				url, err := uploadImage(picBed, collImage, filePath, key, img, true)
 				if err != nil {
 					// 上传失败
 					imageChange = imageChange || false
 				} else {
-					imageChange = imageChange || true
+					if img.Type == "tweet" {
+						filter := bson.M{"$and": bson.A{bson.M{"id": img.TweetID}, bson.M{"username": user}}}
+						one := twitterscraper.Tweet{}
+						err := collTweet.Find(context.Background(), filter).One(&one)
+						if err != nil {
+							fmt.Println(err)
+							imageChange = imageChange || false
+						} else {
+							one.Photos[img.Idx] = url
+							update := bson.D{
+								{Key: "$set", Value: bson.D{
+									{Key: "photos", Value: one.Photos},
+								}},
+							}
+							err := collTweet.UpdateOne(context.Background(), filter, update)
+							if err == nil {
+								imageChange = imageChange || true
+							} else {
+								imageChange = imageChange || false
+							}
+						}
+					} else {
+						filter := bson.M{"userinfo.username": user}
+						one := utils.DbProfile{}
+						err := collProfile.Find(context.Background(), filter).One(&one)
+						if err != nil {
+							fmt.Println(err)
+							imageChange = imageChange || false
+						} else {
+							if img.Idx == 0 {
+								one.Avatar = url
+								one.Profile.Avatar = url
+								update := bson.D{
+									{Key: "$set", Value: bson.D{
+										{Key: "userinfo", Value: one.UserInfo},
+										{Key: "profile", Value: one.Profile},
+									}},
+								}
+								err := collProfile.UpdateOne(context.Background(), filter, update)
+								if err == nil {
+									imageChange = imageChange || true
+								} else {
+									imageChange = imageChange || false
+								}
+							}
+						}
+					}
 				}
 			} else {
 				imageChange = imageChange || false
@@ -294,7 +340,7 @@ func main() {
 	isUpdate := false
 	updateUsers := []string{}
 	for _, user := range users {
-		imgChange := failImageProcess(collImage, picDir, user, cfg.PicBed)
+		imgChange := failImageProcess(collImage, collTweet, collProfile, picDir, user, cfg.PicBed)
 		var twitter utils.Twitter
 		var tweets []twitterscraper.Tweet
 		maxTweetsNbr := 200
