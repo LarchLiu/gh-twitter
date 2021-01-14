@@ -13,8 +13,8 @@
         />
         <span id="name">
           <span style="font-weight: 700; border: 0 solid black; margin-right: 10px">{{ tweet.Name }}</span>
-          <span v-if="tweet.IsRetweet">转推 </span>
-          <span style="font-weight: 400; color: rgb(91, 112, 131);">
+          <span v-if="tweet.IsRetweet">转推 <span style="font-weight: 400; color: rgb(91, 112, 131);">{{ getRtName(tweet.Text) }}</span></span>
+          <span v-else style="font-weight: 400; color: rgb(91, 112, 131);">
             {{ '@' + tweet.Username }}
           </span>
         </span>
@@ -65,8 +65,8 @@
       <div ref="detail" class="detail">
         <div id="name">
           <span style="font-weight: 700; border: 0 solid black; margin-right: 10px">{{ tweet.Name }}</span>
-          <span v-if="tweet.IsRetweet">转推 </span>
-          <span style="font-weight: 400; color: rgb(91, 112, 131);">
+          <span v-if="tweet.IsRetweet">转推 <span style="font-weight: 400; color: rgb(91, 112, 131);">{{ getRtName(tweet.Text) + ' · ' + getTime(tweet.Timestamp) }}</span></span>
+          <span v-else style="font-weight: 400; color: rgb(91, 112, 131);">
             {{ '@' + tweet.Username + ' · ' + getTime(tweet.Timestamp) }}
           </span>
         </div>
@@ -131,6 +131,11 @@ export default {
 
     const getTime = (timestamp) => {
       return formatTime(timestamp, null)
+    }
+
+    const getRtName = (text) => {
+      var regRt = /^RT (@.*?):/
+      return regRt.test(text) ? regRt.exec(text)[1] : ''
     }
 
     const checkImgRadiusClass = (idx, len) => {
@@ -231,6 +236,7 @@ export default {
 
     return {
       getTime,
+      getRtName,
       mouseEnter,
       checkImgRadiusClass,
       checkImgClass,

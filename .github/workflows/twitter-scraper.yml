@@ -73,6 +73,7 @@ jobs:
           QINIU_DOMAIN: ${{ secrets.QINIU_DOMAIN }}
           QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
           QINIU_RESOURCE_PREFIX: ${{ secrets.QINIU_RESOURCE_PREFIX }}
+          SMMS_TOKEN: ${{ secrets.SMMS_TOKEN }}
 
       - name: Run scraper
         if: ${{ !(github.event.action=='addusers' || github.event.action=='delusers') }}
