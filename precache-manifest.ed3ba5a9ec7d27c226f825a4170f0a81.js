@@ -64,7 +64,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/img/icons/safari-pinned-tab.svg"
   },
   {
-    "revision": "c28b6b9454e37bea23017399336db2c9",
+    "revision": "e2667edb6dab874b428ef3fcc0d0a6e5",
     "url": "/gh-twitter/index.html"
   },
   {
@@ -72,8 +72,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/robots.txt"
   },
   {
-    "revision": "74fb69be3fc76047ace8",
+    "revision": "1e3e43fdc5a2a8e3bc64",
     "url": "/gh-twitter/static/css/app.cb8f91c0.css"
+  },
+  {
+    "revision": "6a6eae1579dfad011bd9",
+    "url": "/gh-twitter/static/css/chunk-78fbfa9b.9bb7222d.css"
   },
   {
     "revision": "eea7b2c3a48941616021",
@@ -84,12 +88,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/static/css/chunk-antdv.b50b2b7c.css"
   },
   {
-    "revision": "afd950e3c66509629e4b",
-    "url": "/gh-twitter/static/css/chunk-d71d289c.63f4f75b.css"
-  },
-  {
-    "revision": "74fb69be3fc76047ace8",
-    "url": "/gh-twitter/static/js/app.5c0b83d1.js"
+    "revision": "1e3e43fdc5a2a8e3bc64",
+    "url": "/gh-twitter/static/js/app.442569c0.js"
   },
   {
     "revision": "99e65bdf7502429097c4",
@@ -100,6 +100,10 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/static/js/chunk-5d32143c.00742074.js"
   },
   {
+    "revision": "6a6eae1579dfad011bd9",
+    "url": "/gh-twitter/static/js/chunk-78fbfa9b.efc3eb95.js"
+  },
+  {
     "revision": "eea7b2c3a48941616021",
     "url": "/gh-twitter/static/js/chunk-a2fc6c3c.346e2b95.js"
   },
@@ -108,15 +112,11 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/static/js/chunk-antdv.b4094a15.js"
   },
   {
-    "revision": "afd950e3c66509629e4b",
-    "url": "/gh-twitter/static/js/chunk-d71d289c.fdcc6254.js"
-  },
-  {
     "revision": "8a4386106a15f6169e0d",
     "url": "/gh-twitter/static/js/chunk-libs.d62e8ea4.js"
   },
   {
-    "revision": "5a04951e6cf00db129ce",
-    "url": "/gh-twitter/static/js/runtime.5c9cc26b.js"
+    "revision": "c5c916f26e2516fec1d8",
+    "url": "/gh-twitter/static/js/runtime.de424866.js"
   }
 ]);
