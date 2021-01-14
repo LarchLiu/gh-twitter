@@ -110,7 +110,7 @@ func uploadJSON(picBed string, path string, key string) (url string, err error) 
 	return url, nil
 }
 
-func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user string, src string, dbImage utils.DbImage) (htmlSrc string) {
+func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user string, src string, dbImage utils.DbImage, limiter *utils.RateLimiter) (htmlSrc string) {
 	localPath, fileName, err := utils.GetImageInfo(picDir+user, src)
 	if err != nil {
 		fmt.Println(err)
@@ -128,6 +128,9 @@ func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user stri
 				htmlSrc = ghPath
 				fmt.Printf("filePath %s\n", ghPath)
 			} else {
+				if limiter != nil {
+					limiter.Limit()
+				}
 				url, err := uploadImage(picBed, coll, localPath, key, dbImage, false)
 				if err != nil {
 					// 上传失败用 github 资源
@@ -141,7 +144,7 @@ func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user stri
 	return htmlSrc
 }
 
-func failImageProcess(collImage *qmgo.Collection, collTweet *qmgo.Collection, collProfile *qmgo.Collection, imgDir string, user string, picBed string) bool {
+func failImageProcess(collImage *qmgo.Collection, collTweet *qmgo.Collection, collProfile *qmgo.Collection, imgDir string, user string, picBed string, limiter *utils.RateLimiter) bool {
 	var imageChange bool = false
 	dbImages := []utils.DbImage{}
 	filter := bson.M{"$and": bson.A{bson.M{"status": "fail"}, bson.M{"user": user}}}
@@ -164,6 +167,9 @@ func failImageProcess(collImage *qmgo.Collection, collTweet *qmgo.Collection, co
 					key = img.Key
 				case "smms":
 					key = fmt.Sprintf("%s_%s", user, img.FileName)
+				}
+				if limiter != nil {
+					limiter.Limit()
 				}
 				url, err := uploadImage(picBed, collImage, filePath, key, img, true)
 				if err != nil {
@@ -275,6 +281,10 @@ func main() {
 	}
 	fmt.Printf("%+v\n", cfg)
 
+	var lim *utils.RateLimiter = nil
+	if cfg.PicBed == "smms" {
+		lim = utils.NewRateLimiter(time.Minute, 20)
+	}
 	ctx := context.Background()
 	cli := model.DbInit()
 	collProfile := model.DbColl(cli, "profile")
@@ -340,7 +350,7 @@ func main() {
 	isUpdate := false
 	updateUsers := []string{}
 	for _, user := range users {
-		imgChange := failImageProcess(collImage, collTweet, collProfile, picDir, user, cfg.PicBed)
+		imgChange := failImageProcess(collImage, collTweet, collProfile, picDir, user, cfg.PicBed, lim)
 		var twitter utils.Twitter
 		var tweets []twitterscraper.Tweet
 		maxTweetsNbr := 200
@@ -367,7 +377,7 @@ func main() {
 						var photos []string
 						for i, src := range tweet.Tweet.Photos {
 							dbImage := utils.DbImage{Type: "tweet", TweetID: tweet.Tweet.ID, Idx: i, User: user}
-							htmlSrc := imageProcess(collImage, cfg.PicBed, picDir, user, src, dbImage)
+							htmlSrc := imageProcess(collImage, cfg.PicBed, picDir, user, src, dbImage, lim)
 							photos = append(photos, htmlSrc)
 						}
 						tweet.Tweet.Photos = photos
@@ -409,7 +419,7 @@ func main() {
 				} else {
 					if profile.Avatar != "" {
 						dbImage := utils.DbImage{Type: "profile", Idx: 0, User: user}
-						profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar, dbImage)
+						profile.Avatar = imageProcess(collImage, cfg.PicBed, picDir, user, profile.Avatar, dbImage, lim)
 					}
 					userInfo := utils.UserInfo{Avatar: profile.Avatar, Username: user, Name: profile.Name,
 						LastTweetTime: lastTweetTime, LastUpdateTime: time.Now().Unix(), TweetsCount: tweetsCnt, Pages: pages}
