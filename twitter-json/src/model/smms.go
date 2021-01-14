@@ -2,6 +2,7 @@ package model
 
 import (
 	"os"
+	"regexp"
 
 	smms "github.com/sequix/smms-golang"
 )
@@ -10,6 +11,7 @@ var token string = os.Getenv("SMMS_TOKEN")
 
 // SmmsUpload upload
 func SmmsUpload(filePath string, fileName string) (*smms.ImageRsp, error) {
+	repeatReg := regexp.MustCompile(`statusCode: 200(.*?)code: image_repeated (.*?)this image exists at: (.*?)$`)
 	client := smms.NewFromToken(token)
 	f, err := os.Open(filePath)
 	if err != nil {
@@ -18,6 +20,12 @@ func SmmsUpload(filePath string, fileName string) (*smms.ImageRsp, error) {
 	defer f.Close()
 
 	rsp, err := client.Upload(fileName, f)
+	if err != nil && repeatReg.MatchString(err.Error()) {
+		temp := smms.ImageRsp{}
+		temp.URL = repeatReg.FindStringSubmatch(err.Error())[3]
+		rsp = &temp
+		err = nil
+	}
 	return rsp, err
 }
 
