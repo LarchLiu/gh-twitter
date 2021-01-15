@@ -46,7 +46,7 @@
             >
             <img
               v-else
-              :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : 'otherImg'"
+              :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : (tweet.Photos.length === 1 ? 'onlyOneImg' : 'otherImg')"
               :src="img"
               :width="checkImgWidth(i, tweet.Photos.length)"
               :class="checkImgClass(i, tweet.Photos.length)"
@@ -91,7 +91,7 @@
             >
             <img
               v-else
-              :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : 'otherImg'"
+              :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : (tweet.Photos.length === 1 ? 'onlyOneImg' : 'otherImg')"
               :src="img"
               :width="checkImgWidth(i, tweet.Photos.length)"
               :class="checkImgClass(i, tweet.Photos.length)"
@@ -126,8 +126,10 @@ export default {
     const mouseEnter = ref(false)
     const imgHeight = ref(0)
     const firstImg = ref(null)
+    const onlyOneImg = ref(null)
     const detail = ref(null)
     const detailWidth = ref(0)
+    const imgMaxHeight = ref(0)
 
     const getTime = (timestamp) => {
       return formatTime(timestamp, null)
@@ -172,12 +174,7 @@ export default {
 
     const checkImgClass = (idx, len) => {
       const className = []
-      if (len > 1) {
-        className.push('fit-contain')
-        if (idx === 0) {
-          className.push('first-img')
-        }
-      }
+      className.push('fit-contain')
       idx++
       if (idx % 2 && len > 1) {
         className.push('mg-right')
@@ -201,6 +198,13 @@ export default {
       if (e && e.width && e.naturalHeight && e.naturalWidth) {
         imgHeight.value = e.naturalHeight * e.width / e.naturalWidth
       }
+      const ooi = onlyOneImg.value
+      if (ooi && ooi.width && ooi.naturalHeight && ooi.naturalWidth) {
+        const height = ooi.naturalHeight * ooi.width / ooi.naturalWidth
+        if (height > imgMaxHeight.value) {
+          imgHeight.value = imgMaxHeight.value
+        }
+      }
     }
 
     const handleMouseEnter = () => {
@@ -223,14 +227,15 @@ export default {
       // })
     })
 
-    watch(() => props.tweet, () => {
-      // 内容改变图片也改变重新计算图片应该显示的高度
-      imgHeight.value = 0
-    })
+    // watch(() => props.tweet, () => {
+    //   // 内容改变图片也改变重新计算图片应该显示的高度
+    //   imgHeight.value = 0
+    // })
 
     watch(detail, () => {
       if (detail.value) {
         detailWidth.value = detail.value.clientWidth
+        imgMaxHeight.value = detailWidth.value * 9 / 16
       }
     })
 
@@ -246,6 +251,7 @@ export default {
       imgOnload,
       imgHeight,
       firstImg,
+      onlyOneImg,
       detail,
       detailWidth
     }
@@ -318,7 +324,7 @@ export default {
       }
       .detail {
         float: right;
-        width: 500px;
+        width: 510px;
 
         .detail-info()
       }
