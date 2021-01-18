@@ -79,29 +79,34 @@
           v-if="tweet.Photos && tweet.Photos.length > 0"
           class="image"
         >
-          <a
-            v-for="(img, i) in tweet.Photos"
-            :key="i"
-            :class="checkImgRadiusClass(i, tweet.Photos.length)"
-          >
-            <img
-              v-if="imgHeight"
-              :src="img"
-              :width="checkImgWidth(i, tweet.Photos.length)"
-              :height="imgHeight"
-              :class="checkImgClass(i, tweet.Photos.length)"
-              @click="clickImg($event)"
+          <div style="position: relative;">
+            <a
+              v-for="(img, i) in tweet.Photos"
+              :key="i"
+              :class="checkImgRadiusClass(i, tweet.Photos.length)"
             >
-            <img
-              v-else
-              :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : (tweet.Photos.length === 1 ? 'onlyOneImg' : 'otherImg')"
-              :src="img"
-              :width="checkImgWidth(i, tweet.Photos.length)"
-              :class="checkImgClass(i, tweet.Photos.length)"
-              :onload="imgOnload"
-              @click="clickImg($event)"
-            >
-          </a>
+              <img
+                v-if="imgHeight"
+                :src="img"
+                :width="checkImgWidth(i, tweet.Photos.length)"
+                :height="imgHeight"
+                :class="checkImgClass(i, tweet.Photos.length)"
+                @click="clickImg($event)"
+              >
+              <img
+                v-else
+                :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : (tweet.Photos.length === 1 ? 'onlyOneImg' : 'otherImg')"
+                :src="img"
+                :width="checkImgWidth(i, tweet.Photos.length)"
+                :class="checkImgClass(i, tweet.Photos.length)"
+                :onload="imgOnload"
+                @click="clickImg($event)"
+              >
+            </a>
+            <a v-if="tweet.Videos">
+              <PlayCircleOutlined style="position: absolute; top:50%; left:50%; margin-top:-20px; margin-left:-20px; color: white; font-size: 40px" />
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -111,9 +116,11 @@
 <script>
 import { ref, onMounted, watch } from 'vue'
 import { formatTime } from '@/utils/index.js'
+import { PlayCircleOutlined } from '@ant-design/icons-vue'
 
 export default {
   name: 'Card',
+  components: { PlayCircleOutlined },
   props: {
     tweet: {
       type: Object,
