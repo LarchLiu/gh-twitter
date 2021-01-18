@@ -48,7 +48,12 @@
         </div>
       </div>
       <div style="font-size: 12px;text-align: center;padding: 5px">
-        <a v-if="!endPage" @click="loadMore">点击加载更多</a>
+        <a v-if="!endPage">
+          <span v-if="!loadingMore" @click="loadMore">
+            点击加载更多
+          </span>
+          <LoadingOutlined v-else />
+        </a>
         <span v-else style="color: #aba8b1;">已经到底了</span>
       </div>
     </div>
@@ -57,10 +62,11 @@
 
 <script>
 import Card from './card.vue'
+import { LoadingOutlined } from '@ant-design/icons-vue'
 
 export default {
   name: 'Twitter',
-  components: { Card },
+  components: { Card, LoadingOutlined },
   props: {
     idName: {
       type: String,
@@ -87,6 +93,10 @@ export default {
       default: false
     },
     endPage: {
+      type: Boolean,
+      default: false
+    },
+    loadingMore: {
       type: Boolean,
       default: false
     }

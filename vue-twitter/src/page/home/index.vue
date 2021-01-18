@@ -100,6 +100,7 @@
             :usersObj="usersListObj"
             :isMobile="isMobile"
             :endPage="curPage === usersData[currentUser].Pages"
+            :loadingMore="loadingMore"
             @loadMore="getNextPage"
             @imgClick="imageClick"
           />
@@ -108,6 +109,7 @@
             :detail="usersData[currentUser]"
             :isMobile="isMobile"
             :endPage="curPage === usersData[currentUser].Pages"
+            :loadingMore="loadingMore"
             @loadMore="getNextPage"
             @imgClick="imageClick"
           />
@@ -210,6 +212,7 @@ export default {
     const delUserVisible = ref(false)
     const sidebarOpen = ref(false)
     const imgPreview = ref(false)
+    const loadingMore = ref(false)
     const imgSrc = ref('')
     const store = useStore()
     const ghToken = computed(() => store.getters.ghToken)
@@ -446,6 +449,9 @@ export default {
         if (updateUser.value.length === 0) {
           needUpdate.value = false
         }
+        if (loadingMore.value) {
+          loadingMore.value = false
+        }
         // nextTick(() => {
         //   checkFixed.value++
         // })
@@ -465,6 +471,7 @@ export default {
     }
 
     const getNextPage = () => {
+      loadingMore.value = true
       curPage.value++
       getUserTweets(currentUser.value, curPage.value)
     }
@@ -571,7 +578,8 @@ export default {
       isMobile,
       getTime,
       sidebarOpen,
-      getNextPage
+      getNextPage,
+      loadingMore
     }
   }
 }
