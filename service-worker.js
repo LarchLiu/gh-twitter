@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/gh-twitter/precache-manifest.6b0f32033a937e518874c3dc1266683b.js"
+  "/gh-twitter/precache-manifest.282e55b706ae576414a5b98db47e8b5a.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "vue-twitter"});
