@@ -477,6 +477,8 @@ export default {
       return parseTime(unix)
     }
 
+    const preD = function (e) { e.preventDefault() }
+
     onMounted(() => {
       ghApi = new Octokit({
         auth: ghToken.value
@@ -518,13 +520,12 @@ export default {
     })
 
     watch(imgPreview, (val) => {
-      var mo = function (e) { e.preventDefault() }
       if (val) {
         document.body.style.overflow = 'hidden'
-        document.addEventListener('touchmove', mo, { passive: false }) // 禁止页面滑动
+        document.addEventListener('touchmove', preD, { passive: false }) // 禁止页面滑动
       } else {
         document.body.style.overflow = '' // 出现滚动条
-        document.removeEventListener('touchmove', mo, { passive: false })
+        document.removeEventListener('touchmove', preD, { passive: false })
       }
     })
 
