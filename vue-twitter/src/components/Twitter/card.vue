@@ -43,6 +43,7 @@
               :width="checkImgWidth(i, tweet.Photos.length)"
               :height="imgHeight"
               :class="checkImgClass(i, tweet.Photos.length)"
+              @click="clickImg($event)"
             >
             <img
               v-else
@@ -51,6 +52,7 @@
               :width="checkImgWidth(i, tweet.Photos.length)"
               :class="checkImgClass(i, tweet.Photos.length)"
               :onload="imgOnload"
+              @click="clickImg($event)"
             >
           </a>
         </div>
@@ -88,6 +90,7 @@
               :width="checkImgWidth(i, tweet.Photos.length)"
               :height="imgHeight"
               :class="checkImgClass(i, tweet.Photos.length)"
+              @click="clickImg($event)"
             >
             <img
               v-else
@@ -96,6 +99,7 @@
               :width="checkImgWidth(i, tweet.Photos.length)"
               :class="checkImgClass(i, tweet.Photos.length)"
               :onload="imgOnload"
+              @click="clickImg($event)"
             >
           </a>
         </div>
@@ -122,7 +126,7 @@ export default {
       default: false
     }
   },
-  setup (props) {
+  setup (props, context) {
     const mouseEnter = ref(false)
     const imgHeight = ref(0)
     const firstImg = ref(null)
@@ -138,6 +142,10 @@ export default {
     const getRtName = (text) => {
       var regRt = /^RT (@.*?):/
       return regRt.test(text) ? regRt.exec(text)[1] : ''
+    }
+
+    const clickImg = (e) => {
+      context.emit('imgClick', e.currentTarget.src)
     }
 
     const checkImgRadiusClass = (idx, len) => {
@@ -242,6 +250,7 @@ export default {
     return {
       getTime,
       getRtName,
+      clickImg,
       mouseEnter,
       checkImgRadiusClass,
       checkImgClass,

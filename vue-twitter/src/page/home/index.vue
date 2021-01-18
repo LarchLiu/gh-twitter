@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <image-preview v-if="imgPreview" @clickit="disablePreview" :imgSrc="imgSrc" />
     <div :class="isMobile ? '' : 'w820'">
       <div class="bd">
         <div class="aside-wrap" v-if="!isMobile">
@@ -100,6 +101,7 @@
             :isMobile="isMobile"
             :endPage="curPage === usersData[currentUser].Pages"
             @loadMore="getNextPage"
+            @imgClick="imageClick"
           />
           <twitter
             v-else
@@ -107,6 +109,7 @@
             :isMobile="isMobile"
             :endPage="curPage === usersData[currentUser].Pages"
             @loadMore="getNextPage"
+            @imgClick="imageClick"
           />
         </div>
         <div v-else :class="isMobile ? 'tweets-mobile' : 'tweets'">
@@ -160,6 +163,7 @@ import { useStore } from 'vuex'
 import twitterApi from '@/api/twitter/index'
 import AsideBox from '@/components/AsideBox/index.vue'
 import Twitter from '@/components/Twitter/index.vue'
+import ImagePreview from '@/components/ImagePreview/index'
 import FixedHeader from '@/components/FixedHeader/index.vue'
 import { Octokit } from '@octokit/core'
 import { arrToObj, uniqueArr, parseTime } from '@/utils/index'
@@ -174,7 +178,18 @@ import {
 } from '@ant-design/icons-vue'
 
 export default {
-  components: { AsideBox, PlusOutlined, SettingFilled, SyncOutlined, Twitter, FixedHeader, MinusOutlined, MenuFoldOutlined, MenuUnfoldOutlined },
+  components: {
+    AsideBox,
+    PlusOutlined,
+    SettingFilled,
+    SyncOutlined,
+    Twitter,
+    ImagePreview,
+    FixedHeader,
+    MinusOutlined,
+    MenuFoldOutlined,
+    MenuUnfoldOutlined
+  },
   setup () {
     const { ctx } = getCurrentInstance()
     const updateUser = ref([])
@@ -194,6 +209,8 @@ export default {
     const addUserVisible = ref(false)
     const delUserVisible = ref(false)
     const sidebarOpen = ref(false)
+    const imgPreview = ref(false)
+    const imgSrc = ref('')
     const store = useStore()
     const ghToken = computed(() => store.getters.ghToken)
     const isMobile = computed(() => store.getters.isMobile)
@@ -211,6 +228,15 @@ export default {
       ctx.$router.push({
         path: '/login'
       })
+    }
+
+    const disablePreview = () => {
+      imgPreview.value = false
+    }
+
+    const imageClick = (src) => {
+      imgSrc.value = src
+      imgPreview.value = true
     }
 
     const actionScraper = () => {
@@ -491,7 +517,22 @@ export default {
       })
     })
 
+    watch(imgPreview, (val) => {
+      var mo = function (e) { e.preventDefault() }
+      if (val) {
+        document.body.style.overflow = 'hidden'
+        document.addEventListener('touchmove', mo, { passive: false }) // 禁止页面滑动
+      } else {
+        document.body.style.overflow = '' // 出现滚动条
+        document.removeEventListener('touchmove', mo, { passive: false })
+      }
+    })
+
     return {
+      disablePreview,
+      imageClick,
+      imgPreview,
+      imgSrc,
       currentUser,
       curPage,
       usersList,

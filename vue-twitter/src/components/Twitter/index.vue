@@ -37,11 +37,13 @@
             v-if="isAll && usersObj"
             :tweet="margeDetail(tweet, { Avatar: usersObj[tweet.Username].Avatar, Name: usersObj[tweet.Username].Name})"
             :isMobile="isMobile"
+            @imgClick="imageClick"
           />
           <card
             v-else
             :tweet="margeDetail(tweet, detail.Profile)"
             :isMobile="isMobile"
+            @imgClick="imageClick"
           />
         </div>
       </div>
@@ -95,6 +97,9 @@ export default {
     },
     loadMore () {
       this.$emit('loadMore')
+    },
+    imageClick (imgSrc) {
+      this.$emit('imgClick', imgSrc)
     }
   }
 }
