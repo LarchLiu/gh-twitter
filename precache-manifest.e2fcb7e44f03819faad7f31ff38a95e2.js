@@ -64,7 +64,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/img/icons/safari-pinned-tab.svg"
   },
   {
-    "revision": "6ccbb3adf3add8c7747a2807276fa4d0",
+    "revision": "c95cf1245bd7fdc49c12cbdcb5e87532",
     "url": "/gh-twitter/index.html"
   },
   {
@@ -72,12 +72,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/robots.txt"
   },
   {
-    "revision": "ce73045225a15bdec457",
+    "revision": "c2774fa56a10071b450f",
     "url": "/gh-twitter/static/css/app.cb8f91c0.css"
   },
   {
-    "revision": "f28a459da24b847ce3c2",
-    "url": "/gh-twitter/static/css/chunk-3307e672.94fbefa7.css"
+    "revision": "8ff40fe220619c18e2bf",
+    "url": "/gh-twitter/static/css/chunk-6fcb78e4.401b068e.css"
   },
   {
     "revision": "eea7b2c3a48941616021",
@@ -88,20 +88,24 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/static/css/chunk-antdv.b50b2b7c.css"
   },
   {
-    "revision": "ce73045225a15bdec457",
-    "url": "/gh-twitter/static/js/app.477eece6.js"
+    "revision": "3adf1cb57febe4a87713",
+    "url": "/gh-twitter/static/css/chunk-libs.5dd81f3c.css"
+  },
+  {
+    "revision": "c2774fa56a10071b450f",
+    "url": "/gh-twitter/static/js/app.c366d025.js"
   },
   {
     "revision": "99e65bdf7502429097c4",
     "url": "/gh-twitter/static/js/chunk-2d0a2d66.9635cc38.js"
   },
   {
-    "revision": "f28a459da24b847ce3c2",
-    "url": "/gh-twitter/static/js/chunk-3307e672.11ff1471.js"
+    "revision": "76e47527901f08260375",
+    "url": "/gh-twitter/static/js/chunk-55e11ae0.5e4a6eaa.js"
   },
   {
-    "revision": "4364a127cac2494ca27b",
-    "url": "/gh-twitter/static/js/chunk-66abd91c.a525cb8f.js"
+    "revision": "8ff40fe220619c18e2bf",
+    "url": "/gh-twitter/static/js/chunk-6fcb78e4.79559b4a.js"
   },
   {
     "revision": "eea7b2c3a48941616021",
@@ -112,11 +116,11 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/gh-twitter/static/js/chunk-antdv.b4094a15.js"
   },
   {
-    "revision": "be4b2a458003c25d6fef",
-    "url": "/gh-twitter/static/js/chunk-libs.50459b7c.js"
+    "revision": "3adf1cb57febe4a87713",
+    "url": "/gh-twitter/static/js/chunk-libs.6ade13f8.js"
   },
   {
-    "revision": "c87fc8ce11639c023c9e",
-    "url": "/gh-twitter/static/js/runtime.07ff7de0.js"
+    "revision": "479da08bf6b34d6ad765",
+    "url": "/gh-twitter/static/js/runtime.84986751.js"
   }
 ]);
