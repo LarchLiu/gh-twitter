@@ -169,7 +169,6 @@ import ImagePreview from '@/components/ImagePreview/index'
 import FixedHeader from '@/components/FixedHeader/index.vue'
 import { Octokit } from '@octokit/core'
 import { arrToObj, uniqueArr, parseTime } from '@/utils/index'
-import { message } from 'ant-design-vue'
 import {
   MinusOutlined,
   PlusOutlined,
@@ -192,7 +191,7 @@ export default {
     MenuFoldOutlined,
     MenuUnfoldOutlined
   },
-  setup () {
+  setup (props, { slots }) {
     const { ctx } = getCurrentInstance()
     const updateUser = ref([])
     const usersList = ref([])
@@ -244,12 +243,12 @@ export default {
 
     const actionScraper = () => {
       if (triggerUpdate.value) {
-        message.warning({
+        ctx.$message.warning({
           content: '更新请求未完毕，请耐心等待',
           duration: 3
         })
       } else if (triggerChangeUsers.value) {
-        message.warning({
+        ctx.$message.warning({
           content: '更改用户请求未完毕，请耐心等待',
           duration: 3
         })
@@ -258,18 +257,18 @@ export default {
           event_type: 'scraper'
         }).then(res => {
           triggerUpdate.value = true
-          message.success({
+          ctx.$message.success({
             content: '更新请求已发出，请等待响应',
             duration: 3
           })
         }).catch(err => {
           if (err.status === 401) {
-            message.error({
+            ctx.$message.error({
               content: `token 权限有误, ${err.status} ${err.message}`,
               duration: 3
             })
           } else {
-            message.error({
+            ctx.$message.error({
               content: `${err.status} ${err.message}`,
               duration: 3
             })
@@ -288,18 +287,18 @@ export default {
       }).then(res => {
         triggerChangeUsers.value = true
         const content = type === 'addusers' ? '添加' : '删除'
-        message.success({
+        ctx.$message.success({
           content: content + '用户请求已发出，请等待响应',
           duration: 3
         })
       }).catch(err => {
         if (err.status === 401) {
-          message.error({
+          ctx.$message.error({
             content: `token 权限有误, ${err.status} ${err.message}`,
             duration: 3
           })
         } else {
-          message.error({
+          ctx.$message.error({
             content: `${err.status} ${err.message}`,
             duration: 3
           })
@@ -321,12 +320,12 @@ export default {
 
     const handleAddUsers = () => {
       if (triggerUpdate.value) {
-        message.warning({
+        ctx.$message.warning({
           content: '更新请求未完毕，请耐心等待',
           duration: 3
         })
       } else if (triggerChangeUsers.value) {
-        message.warning({
+        ctx.$message.warning({
           content: '更改用户请求未完毕，请耐心等待',
           duration: 3
         })
@@ -337,12 +336,12 @@ export default {
 
     const handleDelUsers = () => {
       if (triggerUpdate.value) {
-        message.warning({
+        ctx.$message.warning({
           content: '更新请求未完毕，请耐心等待',
           duration: 3
         })
       } else if (triggerChangeUsers.value) {
-        message.warning({
+        ctx.$message.warning({
           content: '更改用户请求未完毕，请耐心等待',
           duration: 3
         })
@@ -357,7 +356,7 @@ export default {
       if (users) {
         actionChangeUsers('addusers', users)
       } else {
-        message.warning({
+        ctx.$message.warning({
           content: '用户名为空',
           duration: 3
         })
@@ -371,7 +370,7 @@ export default {
       if (users) {
         actionChangeUsers('delusers', users)
       } else {
-        message.warning({
+        ctx.$message.warning({
           content: '未选择用户',
           duration: 3
         })
@@ -505,14 +504,14 @@ export default {
     watch(updateTime, () => {
       if (triggerUpdate.value) {
         triggerUpdate.value = false
-        message.success({
+        ctx.$message.success({
           content: '更新请求已完毕',
           duration: 3
         })
       }
       if (triggerChangeUsers.value) {
         triggerChangeUsers.value = false
-        message.success({
+        ctx.$message.success({
           content: '更改用户请求已完毕',
           duration: 3
         })

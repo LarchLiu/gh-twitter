@@ -28,8 +28,13 @@
         <div class="text">
           <span v-html="tweet.HTML" />
         </div>
+        <div v-if="tweet.Videos" class="video">
+          <div v-for="(video, i) in tweet.Videos" :key="i" class="all-radius">
+            <vue3-video-player :src="video.URL" :cover="video.Preview"></vue3-video-player>
+          </div>
+        </div>
         <div
-          v-if="tweet.Photos && tweet.Photos.length > 0"
+          v-else-if="tweet.Photos && tweet.Photos.length > 0"
           class="image"
         >
           <a
@@ -75,38 +80,40 @@
         <div class="text">
           <span v-html="tweet.HTML" />
         </div>
+        <div v-if="tweet.Videos" class="video">
+          <div v-for="(video, i) in tweet.Videos" :key="i" class="all-radius">
+            <div v-if="detailWidth"  :style="{ width: detailWidth }">
+              <vue3-video-player :src="video.URL" :cover="video.Preview"></vue3-video-player>
+            </div>
+          </div>
+        </div>
         <div
-          v-if="tweet.Photos && tweet.Photos.length > 0"
+          v-else-if="tweet.Photos && tweet.Photos.length > 0"
           class="image"
         >
-          <div style="position: relative;">
-            <a
-              v-for="(img, i) in tweet.Photos"
-              :key="i"
-              :class="checkImgRadiusClass(i, tweet.Photos.length)"
+          <a
+            v-for="(img, i) in tweet.Photos"
+            :key="i"
+            :class="checkImgRadiusClass(i, tweet.Photos.length)"
+          >
+            <img
+              v-if="imgHeight"
+              :src="img"
+              :width="checkImgWidth(i, tweet.Photos.length)"
+              :height="imgHeight"
+              :class="checkImgClass(i, tweet.Photos.length)"
+              @click="clickImg($event)"
             >
-              <img
-                v-if="imgHeight"
-                :src="img"
-                :width="checkImgWidth(i, tweet.Photos.length)"
-                :height="imgHeight"
-                :class="checkImgClass(i, tweet.Photos.length)"
-                @click="clickImg($event)"
-              >
-              <img
-                v-else
-                :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : (tweet.Photos.length === 1 ? 'onlyOneImg' : 'otherImg')"
-                :src="img"
-                :width="checkImgWidth(i, tweet.Photos.length)"
-                :class="checkImgClass(i, tweet.Photos.length)"
-                :onload="imgOnload"
-                @click="clickImg($event)"
-              >
-            </a>
-            <a v-if="tweet.Videos">
-              <PlayCircleOutlined style="position: absolute; top:50%; left:50%; margin-top:-20px; margin-left:-20px; color: white; font-size: 40px" />
-            </a>
-          </div>
+            <img
+              v-else
+              :ref="i === 0 && tweet.Photos.length > 1 ? 'firstImg' : (tweet.Photos.length === 1 ? 'onlyOneImg' : 'otherImg')"
+              :src="img"
+              :width="checkImgWidth(i, tweet.Photos.length)"
+              :class="checkImgClass(i, tweet.Photos.length)"
+              :onload="imgOnload"
+              @click="clickImg($event)"
+            >
+          </a>
         </div>
       </div>
     </div>
@@ -116,11 +123,9 @@
 <script>
 import { ref, onMounted, watch } from 'vue'
 import { formatTime } from '@/utils/index.js'
-import { PlayCircleOutlined } from '@ant-design/icons-vue'
 
 export default {
   name: 'Card',
-  components: { PlayCircleOutlined },
   props: {
     tweet: {
       type: Object,
@@ -269,7 +274,8 @@ export default {
       firstImg,
       onlyOneImg,
       detail,
-      detailWidth
+      detailWidth,
+      imgMaxHeight
     }
   }
 }
@@ -315,6 +321,12 @@ export default {
         }
         .fit-contain {
           object-fit: cover;
+        }
+      }
+      .video {
+        .all-radius {
+          border-radius: 10px;
+          overflow: hidden;
         }
       }
       .text {

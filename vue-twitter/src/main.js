@@ -1,8 +1,10 @@
 import { createApp } from 'vue'
+import Vue3VideoPlayer from '@cloudgeek/vue3-video-player'
 import store from './store'
 import App from './App.vue'
 import router from './router'
 import './style/common.less'
+import '@cloudgeek/vue3-video-player/dist/vue3-video-player.css'
 
 // axios
 import axios from './http'
@@ -46,4 +48,5 @@ app
 // 插件注入
 app.use(router)
   .use(store)
+  .use(Vue3VideoPlayer)
   .mount('#app')
