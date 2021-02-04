@@ -176,7 +176,7 @@ func failImageProcess(collImage *qmgo.Collection, collTweet *qmgo.Collection, co
 					// 上传失败
 					imageChange = imageChange || false
 				} else {
-					if img.Type == "tweet" {
+					if img.Type == "photo" {
 						filter := bson.M{"$and": bson.A{bson.M{"id": img.TweetID}, bson.M{"username": user}}}
 						one := twitterscraper.Tweet{}
 						err := collTweet.Find(context.Background(), filter).One(&one)
@@ -188,6 +188,27 @@ func failImageProcess(collImage *qmgo.Collection, collTweet *qmgo.Collection, co
 							update := bson.D{
 								{Key: "$set", Value: bson.D{
 									{Key: "photos", Value: one.Photos},
+								}},
+							}
+							err := collTweet.UpdateOne(context.Background(), filter, update)
+							if err == nil {
+								imageChange = imageChange || true
+							} else {
+								imageChange = imageChange || false
+							}
+						}
+					} else if img.Type == "video" {
+						filter := bson.M{"$and": bson.A{bson.M{"id": img.TweetID}, bson.M{"username": user}}}
+						one := twitterscraper.Tweet{}
+						err := collTweet.Find(context.Background(), filter).One(&one)
+						if err != nil {
+							fmt.Println(err)
+							imageChange = imageChange || false
+						} else {
+							one.Videos[img.Idx].Preview = url
+							update := bson.D{
+								{Key: "$set", Value: bson.D{
+									{Key: "Videos", Value: one.Videos},
 								}},
 							}
 							err := collTweet.UpdateOne(context.Background(), filter, update)
@@ -376,11 +397,21 @@ func main() {
 					if tweet.Tweet.Photos != nil && len(tweet.Tweet.Photos) > 0 {
 						var photos []string
 						for i, src := range tweet.Tweet.Photos {
-							dbImage := utils.DbImage{Type: "tweet", TweetID: tweet.Tweet.ID, Idx: i, User: user}
+							dbImage := utils.DbImage{Type: "photo", TweetID: tweet.Tweet.ID, Idx: i, User: user}
 							htmlSrc := imageProcess(collImage, cfg.PicBed, picDir, user, src, dbImage, lim)
 							photos = append(photos, htmlSrc)
 						}
 						tweet.Tweet.Photos = photos
+					}
+					if tweet.Tweet.Videos != nil && len(tweet.Tweet.Videos) > 0 {
+						var videos []twitterscraper.Video
+						for i, video := range tweet.Tweet.Videos {
+							dbImage := utils.DbImage{Type: "video", TweetID: tweet.Tweet.ID, Idx: i, User: user}
+							htmlSrc := imageProcess(collImage, cfg.PicBed, picDir, user, video.Preview, dbImage, lim)
+							video.Preview = htmlSrc
+							videos = append(videos, video)
+						}
+						tweet.Tweet.Videos = videos
 					}
 					if tweet.Tweet.HTML != "" {
 						tweet.Tweet.HTML = imgReg.ReplaceAllString(tweet.Tweet.HTML, "")

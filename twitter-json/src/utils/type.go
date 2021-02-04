@@ -38,8 +38,8 @@ type (
 		Key      string
 		User     string
 		URL      string
-		Type     string // tweet or profile
-		Idx      int    // tweet: index of photos  profile: 0 -> avatar 1 ->banner
+		Type     string // photo video or profile
+		Idx      int    // photo/video: index of photos/videos  profile: 0 -> avatar 1 ->banner
 		Status   string // upload status: success or fail
 		TweetID  string // if Type is tweet use tweetid for upload fail
 	}
