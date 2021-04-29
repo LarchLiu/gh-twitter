@@ -92,6 +92,7 @@ jobs:
           QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
           QINIU_RESOURCE_PREFIX: ${{ secrets.QINIU_RESOURCE_PREFIX }}
           SMMS_TOKEN: ${{ secrets.SMMS_TOKEN }}
+          CF_WORKERS_DOMAIN: ${{ secrets.CF_WORKERS_DOMAIN }}
 
       - name: Export mongodb
         run: |
