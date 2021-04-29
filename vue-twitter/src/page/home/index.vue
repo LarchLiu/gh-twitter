@@ -192,7 +192,7 @@ export default {
     MenuUnfoldOutlined
   },
   setup (props, { slots }) {
-    const { ctx } = getCurrentInstance()
+    const { ctx, proxy } = getCurrentInstance()
     const updateUser = ref([])
     const usersList = ref([])
     const usersData = ref({})
@@ -243,12 +243,12 @@ export default {
 
     const actionScraper = () => {
       if (triggerUpdate.value) {
-        ctx.$message.warning({
+        proxy.$message.warning({
           content: '更新请求未完毕，请耐心等待',
           duration: 3
         })
       } else if (triggerChangeUsers.value) {
-        ctx.$message.warning({
+        proxy.$message.warning({
           content: '更改用户请求未完毕，请耐心等待',
           duration: 3
         })
@@ -257,18 +257,18 @@ export default {
           event_type: 'scraper'
         }).then(res => {
           triggerUpdate.value = true
-          ctx.$message.success({
+          proxy.$message.success({
             content: '更新请求已发出，请等待响应',
             duration: 3
           })
         }).catch(err => {
           if (err.status === 401) {
-            ctx.$message.error({
+            proxy.$message.error({
               content: `token 权限有误, ${err.status} ${err.message}`,
               duration: 3
             })
           } else {
-            ctx.$message.error({
+            proxy.$message.error({
               content: `${err.status} ${err.message}`,
               duration: 3
             })
@@ -287,18 +287,18 @@ export default {
       }).then(res => {
         triggerChangeUsers.value = true
         const content = type === 'addusers' ? '添加' : '删除'
-        ctx.$message.success({
+        proxy.$message.success({
           content: content + '用户请求已发出，请等待响应',
           duration: 3
         })
       }).catch(err => {
         if (err.status === 401) {
-          ctx.$message.error({
+          proxy.$message.error({
             content: `token 权限有误, ${err.status} ${err.message}`,
             duration: 3
           })
         } else {
-          ctx.$message.error({
+          proxy.$message.error({
             content: `${err.status} ${err.message}`,
             duration: 3
           })
@@ -320,12 +320,12 @@ export default {
 
     const handleAddUsers = () => {
       if (triggerUpdate.value) {
-        ctx.$message.warning({
+        proxy.$message.warning({
           content: '更新请求未完毕，请耐心等待',
           duration: 3
         })
       } else if (triggerChangeUsers.value) {
-        ctx.$message.warning({
+        proxy.$message.warning({
           content: '更改用户请求未完毕，请耐心等待',
           duration: 3
         })
@@ -336,12 +336,12 @@ export default {
 
     const handleDelUsers = () => {
       if (triggerUpdate.value) {
-        ctx.$message.warning({
+        proxy.$message.warning({
           content: '更新请求未完毕，请耐心等待',
           duration: 3
         })
       } else if (triggerChangeUsers.value) {
-        ctx.$message.warning({
+        proxy.$message.warning({
           content: '更改用户请求未完毕，请耐心等待',
           duration: 3
         })
@@ -356,7 +356,7 @@ export default {
       if (users) {
         actionChangeUsers('addusers', users)
       } else {
-        ctx.$message.warning({
+        proxy.$message.warning({
           content: '用户名为空',
           duration: 3
         })
@@ -370,7 +370,7 @@ export default {
       if (users) {
         actionChangeUsers('delusers', users)
       } else {
-        ctx.$message.warning({
+        proxy.$message.warning({
           content: '未选择用户',
           duration: 3
         })
@@ -504,14 +504,14 @@ export default {
     watch(updateTime, () => {
       if (triggerUpdate.value) {
         triggerUpdate.value = false
-        ctx.$message.success({
+        proxy.$message.success({
           content: '更新请求已完毕',
           duration: 3
         })
       }
       if (triggerChangeUsers.value) {
         triggerChangeUsers.value = false
-        ctx.$message.success({
+        proxy.$message.success({
           content: '更改用户请求已完毕',
           duration: 3
         })
