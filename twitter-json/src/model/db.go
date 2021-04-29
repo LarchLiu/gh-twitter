@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+	"os"
 	"twitter-json/src/utils"
 
 	"github.com/qiniu/qmgo"
@@ -11,7 +12,8 @@ import (
 
 // DbInit init mogodb.
 func DbInit() *qmgo.Client {
-	client, _ := qmgo.NewClient(context.Background(), &qmgo.Config{Uri: "mongodb://localhost:27017"})
+	uri := os.Getenv("MONGODB_CLOUD_URI")
+	client, _ := qmgo.NewClient(context.Background(), &qmgo.Config{Uri: uri})
 	return client
 }
 
