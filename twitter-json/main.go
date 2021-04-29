@@ -111,6 +111,9 @@ func uploadJSON(picBed string, path string, key string) (url string, err error) 
 }
 
 func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user string, src string, dbImage utils.DbImage, limiter *utils.RateLimiter) (htmlSrc string) {
+	if picBed == "cfworkers" {
+		return utils.ReplaceDomain(src)
+	}
 	localPath, fileName, err := utils.GetImageInfo(picDir+user, src)
 	if err != nil {
 		fmt.Println(err)

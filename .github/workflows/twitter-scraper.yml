@@ -1,7 +1,7 @@
 name: twitter scraper
 on:
-  schedule:
-    - cron: "0 0/4 * * *"
+  # schedule:
+  #   - cron: "0 0/4 * * *"
   repository_dispatch:
     types: [scraper, addusers, delusers]
   workflow_dispatch:
@@ -74,6 +74,7 @@ jobs:
           QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
           QINIU_RESOURCE_PREFIX: ${{ secrets.QINIU_RESOURCE_PREFIX }}
           SMMS_TOKEN: ${{ secrets.SMMS_TOKEN }}
+          CF_WORKERS_DOMAIN: ${{ secrets.CF_WORKERS_DOMAIN }}
 
       - name: Run scraper
         if: ${{ !(github.event.action=='addusers' || github.event.action=='delusers') }}
