@@ -112,7 +112,8 @@ func uploadJSON(picBed string, path string, key string) (url string, err error) 
 
 func imageProcess(coll *qmgo.Collection, picBed string, picDir string, user string, src string, dbImage utils.DbImage, limiter *utils.RateLimiter) (htmlSrc string) {
 	if picBed == "cfworkers" {
-		return utils.ReplaceDomain(src)
+		domain := os.Getenv("CF_WORKERS_IMG_DOMAIN")
+		return utils.ReplaceDomain(src, domain)
 	}
 	localPath, fileName, err := utils.GetImageInfo(picDir+user, src)
 	if err != nil {
@@ -294,6 +295,7 @@ func jsonTwitterFromDB(coll *qmgo.Collection, picBed string, dir string, selUser
 }
 
 func main() {
+	videoDomain := os.Getenv("CF_WORKERS_VIDEO_DOMAIN")
 	info := utils.UserChangeInfo{}
 	if err := env.Parse(&info); err != nil {
 		fmt.Printf("%+v\n", err)
@@ -412,6 +414,7 @@ func main() {
 							dbImage := utils.DbImage{Type: "video", TweetID: tweet.Tweet.ID, Idx: i, User: user}
 							htmlSrc := imageProcess(collImage, cfg.PicBed, picDir, user, video.Preview, dbImage, lim)
 							video.Preview = htmlSrc
+							video.URL = utils.ReplaceDomain(video.URL, videoDomain)
 							videos = append(videos, video)
 						}
 						tweet.Tweet.Videos = videos

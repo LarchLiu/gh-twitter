@@ -74,7 +74,8 @@ jobs:
           QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
           QINIU_RESOURCE_PREFIX: ${{ secrets.QINIU_RESOURCE_PREFIX }}
           SMMS_TOKEN: ${{ secrets.SMMS_TOKEN }}
-          CF_WORKERS_DOMAIN: ${{ secrets.CF_WORKERS_DOMAIN }}
+          CF_WORKERS_VIDEO_DOMAIN: ${{ secrets.CF_WORKERS_VIDEO_DOMAIN }}
+          CF_WORKERS_IMG_DOMAIN: ${{ secrets.CF_WORKERS_IMG_DOMAIN }}
 
       - name: Run scraper
         if: ${{ !(github.event.action=='addusers' || github.event.action=='delusers') }}
@@ -92,7 +93,8 @@ jobs:
           QINIU_SECRET_KEY: ${{ secrets.QINIU_SECRET_KEY }}
           QINIU_RESOURCE_PREFIX: ${{ secrets.QINIU_RESOURCE_PREFIX }}
           SMMS_TOKEN: ${{ secrets.SMMS_TOKEN }}
-          CF_WORKERS_DOMAIN: ${{ secrets.CF_WORKERS_DOMAIN }}
+          CF_WORKERS_VIDEO_DOMAIN: ${{ secrets.CF_WORKERS_VIDEO_DOMAIN }}
+          CF_WORKERS_IMG_DOMAIN: ${{ secrets.CF_WORKERS_IMG_DOMAIN }}
 
       - name: Export mongodb
         run: |
