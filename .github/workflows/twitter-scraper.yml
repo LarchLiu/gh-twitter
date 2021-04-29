@@ -76,6 +76,7 @@ jobs:
           SMMS_TOKEN: ${{ secrets.SMMS_TOKEN }}
           CF_WORKERS_VIDEO_DOMAIN: ${{ secrets.CF_WORKERS_VIDEO_DOMAIN }}
           CF_WORKERS_IMG_DOMAIN: ${{ secrets.CF_WORKERS_IMG_DOMAIN }}
+          MONGODB_CLOUD_URI: ${{ secrets.MONGODB_CLOUD_URI }}
 
       - name: Run scraper
         if: ${{ !(github.event.action=='addusers' || github.event.action=='delusers') }}
@@ -95,6 +96,7 @@ jobs:
           SMMS_TOKEN: ${{ secrets.SMMS_TOKEN }}
           CF_WORKERS_VIDEO_DOMAIN: ${{ secrets.CF_WORKERS_VIDEO_DOMAIN }}
           CF_WORKERS_IMG_DOMAIN: ${{ secrets.CF_WORKERS_IMG_DOMAIN }}
+          MONGODB_CLOUD_URI: ${{ secrets.MONGODB_CLOUD_URI }}
 
       # - name: Export mongodb
       #   run: |
